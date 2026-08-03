@@ -1,0 +1,4 @@
+interface:
+  display_name: "版本回归与发布门禁"
+  short_description: "消费回归与 NFR/SLO 证据，输出完整发布、放量与回滚状态"
+  default_prompt: "使用 $release-regression-gatekeeper 审核回归、NFR/SLO 与发布证据，并输出 GO、CONDITIONAL_GO、NO_GO、BLOCKED 或 ROLLBACK。"

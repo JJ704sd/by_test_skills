@@ -1,0 +1,4 @@
+interface:
+  display_name: "测试范围与用例设计"
+  short_description: "界定功能与 NFR 风险范围，量化 SLO 并设计可追溯用例"
+  default_prompt: "使用 $test-scope-case-designer 根据需求、变更和 NFR 输出风险范围、SLO、排除项、覆盖矩阵与用例。"

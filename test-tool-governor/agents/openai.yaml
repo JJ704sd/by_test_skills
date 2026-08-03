@@ -1,0 +1,4 @@
+interface:
+  display_name: "测试工具选型与治理"
+  short_description: "按 NFR 与风险选择测试工具，审查隔离、权限、证据和资产治理"
+  default_prompt: "使用 $test-tool-governor 按测试目标和 NFR 选择工具，并输出选型决策、执行授权与安全治理要求。"

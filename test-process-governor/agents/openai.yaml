@@ -1,0 +1,4 @@
+interface:
+  display_name: "测试流程治理"
+  short_description: "编排完整测试，治理功能与通用确定性 NFR 的证据和准出门禁"
+  default_prompt: "使用 $test-process-governor 编排功能与通用服务、API、UI 确定性 NFR 测试，并输出中文状态及对应机器态。"

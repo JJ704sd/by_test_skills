@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent 非确定性评测"
+  short_description: "联合评估 Agent 技术指标、非确定性语义质量与运行 NFR"
+  default_prompt: "使用 $agent-nondeterministic-evaluator 先选择 evaluate、create_baseline 或 online_monitor 模式，再联合输出技术、语义与运行 NFR 的对应门禁或信号。"
