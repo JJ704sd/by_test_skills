@@ -1,0 +1,4 @@
+interface:
+  display_name: "测试工具选型与治理"
+  short_description: "优先复用团队标准，快速完成工具选型、安全授权与治理交接"
+  default_prompt: "使用 $test-tool-governor 先检查现有标准能否复用，再按最小决策深度完成选型、安全授权与交接。"

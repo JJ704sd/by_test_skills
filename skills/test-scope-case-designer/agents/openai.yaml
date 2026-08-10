@@ -1,0 +1,4 @@
+interface:
+  display_name: "测试范围与用例设计"
+  short_description: "按变更增量界定风险范围，并生成去重、可追溯的测试用例"
+  default_prompt: "使用 $test-scope-case-designer 增量分析变更与风险，按所需深度输出范围、代表用例或可入库基线。"

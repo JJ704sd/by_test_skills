@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent 非确定性评测"
+  short_description: "低浪费执行 Agent 预检、采样、门禁、漂移与运行 NFR 评测"
+  default_prompt: "使用 $agent-nondeterministic-evaluator 先预检评测管线，再按批准深度执行分层判定、采样与门禁。"
