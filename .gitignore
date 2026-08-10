@@ -4,5 +4,17 @@ tmp/
 # Editor and operating-system files
 .DS_Store
 Thumbs.db
+desktop.ini
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
+
+# Auth / device flow artifacts (carried over from origin/main bot initial commit)
+.gh_token
+.gh_device_poll.*
+
+# Logs
+*.log
+*.tmp
