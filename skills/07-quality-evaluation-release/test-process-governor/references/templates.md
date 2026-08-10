@@ -21,8 +21,11 @@ handoff_packet:
   snapshot_id: null
   upstream_packet_refs: []
   decision:
+    decision_point: ENTRY_GATE | CONTINUE_OR_PAUSE | EXIT_GATE | EXECUTION_COMPLETION | LIFECYCLE_CLOSURE | null
     human_status: null
-    machine_status: PASS | PASS_WITH_ACCEPTED_RISK | FAIL | PAUSED | BLOCKED | null
+    machine_status: PASS | PASS_WITH_ACCEPTED_RISK | FAIL | PAUSED | BLOCKED | NOT_APPLICABLE | null
+  test_execution_status: NOT_STARTED | IN_PROGRESS | COMPLETED | PAUSED | BLOCKED | null
+  test_lifecycle_status: OPEN | READY_TO_CLOSE | CLOSED | null
   reused_evidence: []
   changed_facts: []
   completed_checks: []
@@ -36,11 +39,16 @@ handoff_packet:
 
 `snapshot_id` 至少绑定版本/build、范围、当前阶段/门禁、需求/变更、范围/用例、环境/配置、阈值配置和证据查询时间。任何绑定项变化时只使受影响结论失效，不自动推翻无关事实。
 
+`decision_point` 是机器交接的必填语义，不能用准入或执行完成结论替代准出。ENTRY_GATE 与 EXIT_GATE 使用门禁状态；CONTINUE_OR_PAUSE 命中暂停条件时返回 PAUSED；EXECUTION_COMPLETION 使用 `machine_status=NOT_APPLICABLE` 并只更新执行进度，执行完成不代表测试通过；LIFECYCLE_CLOSURE 在关闭条件已满足、已知未满足或无法核实时分别返回 PASS、FAIL 或 BLOCKED。
+
+`test_execution_status` 只表示执行进度，不表示通过。EXIT_GATE 达成且报告、遗留跟踪和发布交接均已归档时，生命周期从 OPEN 进入 READY_TO_CLOSE；关闭动作有证据后才是 CLOSED。三个状态轴不得相互推定。
+
 ## 快速门禁答复
 
 ```markdown
 - delivery_mode：gate_only
-- 结论 / machine_status：
+- 当前决策点 / 结论 / machine_status：
+- test_execution_status / test_lifecycle_status：
 - 关键通过证据：
 - 首个硬阻塞项：
 - 最小补充或整改：
@@ -53,14 +61,14 @@ handoff_packet:
 ```markdown
 | 阶段 | 输入/版本 | 必做动作 | 输出与证据 | 责任人 | stage_status | gate_machine_status | 下一门禁 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 需求分析 | | | | | NOT_STARTED/IN_PROGRESS/COMPLETED/BLOCKED | PASS/PASS_WITH_ACCEPTED_RISK/FAIL/PAUSED/BLOCKED/N/A | |
+| 需求分析 | | | | | NOT_STARTED/IN_PROGRESS/COMPLETED/BLOCKED | PASS/PASS_WITH_ACCEPTED_RISK/FAIL/PAUSED/BLOCKED/NOT_APPLICABLE | |
 | 测试设计 | | | | | | | |
 | 开发与提测 | | | | | | | |
 | 版本测试 | | | | | | | |
 | 上线与复盘 | | | | | | | |
 ```
 
-`stage_status` 只表示生命周期进度；`gate_machine_status` 只表示门禁结论。进行中阶段通常使用 `gate_machine_status=N/A`，两者不得相互推导。
+`stage_status` 只表示生命周期进度；`gate_machine_status` 只表示门禁结论。没有门禁决策的阶段使用 `gate_machine_status=NOT_APPLICABLE`，两者不得相互推导。
 
 ## 缺陷记录
 
@@ -101,8 +109,11 @@ handoff_packet:
 
 ## 结论
 - 当前阶段：
-- 测试状态：通过 / 有条件通过 / 不通过 / 暂停 / 待补证据
-- machine_status：PASS / PASS_WITH_ACCEPTED_RISK / FAIL / PAUSED / BLOCKED
+- test_execution_status：NOT_STARTED / IN_PROGRESS / COMPLETED / PAUSED / BLOCKED
+- decision_point：ENTRY_GATE / CONTINUE_OR_PAUSE / EXIT_GATE / EXECUTION_COMPLETION / LIFECYCLE_CLOSURE
+- 当前决策状态：通过 / 有条件通过 / 不通过 / 暂停 / 待补证据 / 不适用
+- machine_status：PASS / PASS_WITH_ACCEPTED_RISK / FAIL / PAUSED / BLOCKED / NOT_APPLICABLE
+- test_lifecycle_status：OPEN / READY_TO_CLOSE / CLOSED
 - 发布建议：交由发布门禁评审 / 暂不交付发布
 - 关键依据：
 
@@ -134,4 +145,4 @@ handoff_packet:
 - 下一动作、负责人、完成条件：
 ```
 
-最终化前把所有占位符替换为事实或 `UNKNOWN`；`UNKNOWN` 必须映射到相应的待补证据/阻塞状态。数量为 0 时仍需提供查询范围、时间和证据引用。
+最终化前把所有占位符替换为事实或 `UNKNOWN`。只有未知项使当前门禁无法判定时才映射为 BLOCKED；已知硬失败或暂停条件优先，未知项作为次级证据缺口列出，不能覆盖 FAIL/PAUSED。数量为 0 时仍需提供查询范围、时间和证据引用。

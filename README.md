@@ -1,72 +1,81 @@
-# by_test_skills · 工程与质量 Skills 集合
+# by_test_skills — 工程与质量 Skills 集合
 
 [![Validate skills](https://github.com/JJ704sd/by_test_skills/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/JJ704sd/by_test_skills/actions/workflows/validate-skills.yml) · [MIT License](LICENSE)
 
-面向软件工程、质量保障与 Agent 评测的可复用技能集合。仓库包含 **30 个技能**，按实际使用场景打包为 8 个有序子文件夹；每个技能仍可独立阅读、安装和维护。
+面向软件工程、质量保障与 Agent 评测的可复用 Codex Skills。仓库包含 **25 个技能**，按常见工作场景分为 8 组；每个技能都可独立复制、安装和维护。
 
-## 仓库结构
+## 目录结构
 
 ```text
-.
-├── skills/
-│   ├── 01-onboarding-routing/          # 入口、初始化与技能路由
-│   │   └── <skill-name>/
-│   │       ├── SKILL.md
-│   │       ├── agents/openai.yaml
-│   │       ├── references/             # 可选：规则与参考资料
-│   │       └── scripts/                # 可选：技能自带脚本
-│   ├── 02-research-modeling/           # 调研与领域建模
-│   ├── 03-clarification-planning/      # 澄清、决策与规划
-│   ├── 04-specs-work-management/       # 规格、工单与分流
-│   ├── 05-design-prototyping/          # 设计与原型验证
-│   ├── 06-implementation-debugging/    # 实现、测试驱动与诊断
-│   ├── 07-quality-evaluation-release/  # 测试、评估、审查与发布
-│   └── 08-collaboration-enablement/    # 协作、教学与交接
-├── docs/skills-distribution.md         # 完整分类、职责边界与选择建议
-├── scripts/Test-Skills.ps1             # 仓库结构校验
-└── .github/workflows/validate-skills.yml
+skills/
+├── 01-onboarding-routing/          # 配置与工作路由
+├── 02-research-modeling/           # 调研与领域建模
+├── 03-clarification-planning/      # 澄清、决策与大型规划
+├── 04-specs-work-management/       # 规格、票据与分流
+├── 05-design-prototyping/          # 架构设计、审查与原型
+├── 06-implementation-debugging/    # TDD、诊断、冲突与代码审查
+├── 07-quality-evaluation-release/  # 测试、Agent 评测与发布
+└── 08-collaboration-enablement/    # 学习、向导与交接
 ```
 
-编号表达常见工作流顺序，但不是强制流水线。可以直接进入任一场景，也可以按任务需要跳过或返回前一阶段。
+每个技能目录使用统一结构：
+
+```text
+<skill-name>/
+├── SKILL.md
+├── agents/openai.yaml
+├── references/   # 可选：按需读取的规则和方法
+├── assets/       # 可选：复制或改造成输出的模板
+└── scripts/      # 可选：可执行帮助程序
+```
 
 ## 场景分布
 
-| 顺序 | 场景包 | 数量 | 代表技能 |
+| 顺序 | 场景 | 数量 | 代表技能 |
 | ---: | --- | ---: | --- |
-| 01 | [入口与路由](skills/01-onboarding-routing/) | 2 | `setup-matt-pocock-skills`、`ask-matt` |
-| 02 | [调研与建模](skills/02-research-modeling/) | 2 | `research`、`domain-modeling` |
-| 03 | [澄清与规划](skills/03-clarification-planning/) | 5 | `grilling`、`wayfinder`、`to-questionnaire` |
-| 04 | [规格与工作管理](skills/04-specs-work-management/) | 3 | `to-spec`、`to-tickets`、`triage` |
-| 05 | [设计与原型](skills/05-design-prototyping/) | 3 | `codebase-design`、`prototype` |
-| 06 | [实现与诊断](skills/06-implementation-debugging/) | 4 | `implement`、`tdd`、`diagnosing-bugs` |
-| 07 | [质量、评估与发布](skills/07-quality-evaluation-release/) | 6 | `test-scope-case-designer`、`code-review`、`release-regression-gatekeeper` |
-| 08 | [协作与赋能](skills/08-collaboration-enablement/) | 5 | `teach`、`handoff`、`wizard` |
+| 01 | 配置与路由 | 2 | `configure-engineering-skills`、`route-engineering-work` |
+| 02 | 调研与建模 | 2 | `research`、`domain-modeling` |
+| 03 | 澄清与规划 | 3 | `grilling`、`wayfinder` |
+| 04 | 规格与工作管理 | 3 | `to-spec`、`to-tickets`、`triage` |
+| 05 | 设计与原型 | 3 | `codebase-design`、`review-codebase-architecture`、`prototype` |
+| 06 | 实现与诊断 | 4 | `tdd`、`diagnosing-bugs`、`review-code-against-spec` |
+| 07 | 质量、评估与发布 | 5 | `test-scope-case-designer`、`agent-nondeterministic-evaluator`、`release-regression-gatekeeper` |
+| 08 | 协作与赋能 | 3 | `run-learning-workspace`、`wizard`、`handoff` |
 
-完整清单、技能边界和组合路径见 [技能分布文档](docs/skills-distribution.md)。
+完整职责边界见 [Skills 分布文档](docs/skills-distribution.md)。本轮精简的决策、迁移和验收标准见 [设计规范](docs/skill-simplification-spec.md)。
+
+## 快速选择
+
+- 不确定入口：`$route-engineering-work`
+- 调查可查证事实：`$research`
+- 压力测试尚未定案的想法：`$grilling`
+- 大型工作连决策路线都不清楚：`$wayfinder`
+- 已有规格，拆成实现票：`$to-tickets`
+- 外部 issue/PR 需要分类和补全：`$triage`
+- 扫描整个仓库的架构深化候选：`$review-codebase-architecture`
+- 为已选模块设计接口或 seam：`$codebase-design`
+- 根因未知的 flaky、回归或性能问题：`$diagnosing-bugs`
+- 行为已知并要求测试先行：`$tdd`
+- 按规范和原始 spec 双轴审查 diff：`$review-code-against-spec`
+- 判断 build 能否进入或离开测试：`$test-process-governor`
+- 判断能否发布、继续灰度或必须回滚：`$release-regression-gatekeeper`
+
+典型工程路径：
+
+```text
+调研/建模 → 澄清 → 规格 → 实现票 → 实现/TDD → 双轴代码审查
+                                      → 测试范围 → 工具 → 测试流程
+                                      → Agent 评测（按需）→ 发布门禁
+```
+
+普通实现不需要单独的 `implement` 技能；Codex 默认完成实现，只有 test-first 意图才触发 `$tdd`。
 
 ## 使用方式
 
-1. 根据当前任务选择场景包。
-2. 阅读 `skills/<scenario>/<skill-name>/SKILL.md` 的触发条件、输入和边界。
-3. 安装或复制时以 `<skill-name>/` 为单位，不要只复制 `SKILL.md`，以免遗漏元数据、参考资料或脚本。
-
-常见工程路径：
-
-```text
-入口路由 → 调研建模 → 澄清规划 → 规格工单
-         → 设计原型 → 实现诊断 → 质量发布 → 协作交接
-```
-
-完整测试与发布路径：
-
-```text
-test-scope-case-designer
-  → test-tool-governor
-  → test-process-governor
-  → agent-nondeterministic-evaluator（含 Agent 时）
-  → code-review（含代码变更时）
-  → release-regression-gatekeeper
-```
+1. 从当前任务对应的场景选择技能，或调用 `$route-engineering-work`。
+2. 安装或复用时复制完整的 `<skill-name>/` 目录，不要只复制 `SKILL.md`。
+3. 显式调用使用 `$skill-name`；隐式触发由 `SKILL.md` 的 `description` 决定。
+4. 需要仓库 issue tracker、triage 标签和领域文档约定的工作流，先运行 `$configure-engineering-skills`。
 
 ## 本地校验
 
@@ -78,12 +87,12 @@ powershell -ExecutionPolicy Bypass -File scripts/Test-Skills.ps1
 pwsh -File scripts/Test-Skills.ps1
 ```
 
-校验会检查场景编号是否连续、技能是否严格位于场景目录下一层、`SKILL.md` 名称是否与技能目录一致，以及 `agents/openai.yaml` 是否完整。相同检查会在推送和 Pull Request 时由 GitHub Actions 自动运行。
+校验覆盖场景编号、技能数量与命名、上下文预算、frontmatter、`agents/openai.yaml`、资源分层、长 reference 导航、相对链接和旧技能引用。相同检查会在 push 和 Pull Request 时由 GitHub Actions 执行。
 
 ## 维护约定
 
-- 场景目录使用 `NN-kebab-case`，编号表示推荐浏览顺序。
-- 技能目录位于 `skills/<scenario>/<skill-name>/`，名称使用 kebab-case。
-- 每个技能必须包含 `SKILL.md` 和 `agents/openai.yaml`。
-- 技能私有参考资料和自动化分别放在该技能的 `references/` 与 `scripts/`。
-- 新增、移动或改变技能职责后，同步更新 [技能分布文档](docs/skills-distribution.md)。
+- 场景目录使用连续的 `NN-kebab-case`；技能目录使用唯一的 kebab-case 名称。
+- `SKILL.md` frontmatter 只包含 `name` 与 `description`，且正文不超过 100 行。
+- 触发和排除条件写在 `description`；分支细节放在 `references/`，输出模板放在 `assets/`。
+- `agents/openai.yaml` 必须包含 `display_name`、`short_description` 和引用 `$skill-name` 的 `default_prompt`。
+- 新增、删除、移动或改变技能职责后，同步更新分布文档和校验预算。

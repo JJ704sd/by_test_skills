@@ -1,31 +1,60 @@
 # 贡献指南
 
-## 新增技能
+## 先判断是否需要新技能
 
-1. 根据使用场景选择 `skills/NN-kebab-case/`；只有出现稳定且不同的新场景时才新增场景目录。
-2. 在场景目录下创建 kebab-case 命名的技能目录。
-3. 添加包含 YAML frontmatter 的 `SKILL.md`；其中 `name` 必须与技能目录名一致，`description` 应说明触发场景和职责边界。
-4. 添加 `agents/openai.yaml`，至少包含 `display_name` 和 `short_description`；需要固定调用入口时再添加 `default_prompt`。
-5. 仅在需要时添加 `references/`、`scripts/` 或其他配套文件，并确保 `SKILL.md` 使用相对路径引用。
-6. 更新 `docs/skills-distribution.md` 的场景、描述、路径和统计。
+只有存在稳定且独立的用户意图、非显而易见的领域规则、可复用资源或独立授权边界时，才新增技能。
 
-## 调整场景
+不要新增：
 
-- 场景目录使用连续的两位编号和 kebab-case 名称，例如 `03-clarification-planning`。
-- 移动技能时必须整包移动技能目录，保留其中的 Agent 元数据、参考资料、脚本和模板。
-- 若插入、删除或重排场景，同步更新后续编号、README、分布文档及所有仓库内链接。
-- 技能名在整个仓库中保持唯一，即使它们位于不同场景包。
+- 只转发到另一个技能的 alias。
+- 仅复述 Codex 默认能力的薄包装。
+- 与现有技能只有措辞差异、没有职责差异的变体。
+- 为单次任务创建的过程文档或临时模板。
+
+优先把新分支合并进现有技能，或放入该技能的 `references/` / `assets/`。
+
+## 新增或修改技能
+
+1. 选择 `skills/NN-kebab-case/` 场景目录；只有出现稳定的新场景时才增加场景组。
+2. 使用唯一的 kebab-case 技能名，并让目录名与 frontmatter `name` 完全一致。
+3. `SKILL.md` frontmatter 只写 `name` 和 `description`。
+4. 在 `description` 中同时说明能力、正向触发和关键排除条件；不要在正文另建 “When to use” 章节。
+5. 主文只保留每次调用都需要的流程和硬约束，并控制在 100 行以内。
+6. 详细规则、方法和示例放入 `references/`；复制或改造成输出的模板放入 `assets/`；确定性帮助程序放入 `scripts/`。
+7. reference 从 `SKILL.md` 一层直达；超过 100 行时添加 `## Contents` / `## 目录`，或继续精简。
+8. 添加或更新 `agents/openai.yaml`：
+
+   ```yaml
+   interface:
+     display_name: "Human-facing name"
+     short_description: "25-64 character result summary"
+     default_prompt: "Use $skill-name to produce the requested result."
+   ```
+
+9. 仅显式调用的技能在 `agents/openai.yaml` 使用 `policy.allow_implicit_invocation: false`；不要在 `SKILL.md` 使用 `disable-model-invocation` 或 `argument-hint`。
+10. 技能之间的调用统一写成 `$skill-name`。
+
+## 安全边界
+
+- 不要把 commit、push、发布、生产访问或物质性删除设为普通技能的无条件收尾动作。
+- 只修改任务授权范围内的文件；不要 stage unrelated changes。
+- 诊断技能默认止于原因和建议，除非用户同时授权修复。
+- 生产测试、放量、停止和回滚必须保留各自的授权与证据门禁。
+- 模板脚本必须静态检查；交互式或会写凭据的脚本由用户运行，不由技能自动执行。
+
+## 调整场景或名称
+
+- 移动技能时移动完整目录，保留 `agents/`、`references/`、`assets/` 和 `scripts/`。
+- 重命名时一次性更新所有 `$skill-name`、相对链接、README、分布文档和默认 prompt。
+- 不保留 deprecated alias；在设计 spec 或迁移表中记录旧名即可。
+- 场景编号必须连续。插入、删除或重排场景时同步更新后续编号和仓库内链接。
 
 ## 提交前检查
 
 ```powershell
-# Windows PowerShell
 powershell -ExecutionPolicy Bypass -File scripts/Test-Skills.ps1
-
-# PowerShell 7+
-pwsh -File scripts/Test-Skills.ps1
-git status --short
 git diff --check
+git status --short
 ```
 
-提交应聚焦单一目的，并避免把 `tmp/`、编辑器设置或生成物纳入版本控制。
+同时至少验证一条应触发和一条不应触发的真实请求。涉及门禁、发布或非确定性评测时，再执行独立前向测试。
