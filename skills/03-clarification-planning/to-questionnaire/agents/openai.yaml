@@ -1,5 +1,6 @@
 interface:
   display_name: "To Questionnaire"
-  short_description: "Front-load questions into a doc for someone to answer"
+  short_description: "Draft an asynchronous discovery questionnaire"
+  default_prompt: "Use $to-questionnaire to draft questions for the person who holds the missing context."
 policy:
   allow_implicit_invocation: false

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Configure Engineering Skills"
+  short_description: "Configure repository workflow conventions"
+  default_prompt: "Use $configure-engineering-skills to configure this repository for tracker-backed engineering workflows."
+policy:
+  allow_implicit_invocation: false

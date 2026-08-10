@@ -21,6 +21,9 @@ handoff_packet:
   previous_snapshot_id: null
   upstream_packet_refs: []
   decision: GO | CONDITIONAL_GO | NO_GO | BLOCKED | ROLLBACK | null
+  actor_authorization: AUTHORIZED | NOT_AUTHORIZED | UNKNOWN | null
+  action_progress: NOT_STARTED | REQUESTED | ACKNOWLEDGED | IN_PROGRESS | PARTIAL | COMPLETED | FAILED | UNSAFE | RECOVERY_VERIFIED | null
+  authorized_operator: null
   current_stage: null
   reused_evidence: []
   new_evidence_window: null
@@ -32,6 +35,8 @@ handoff_packet:
 ```
 
 `release_snapshot_id` 至少绑定版本包、代码/配置/数据/Agent 清单、回归与上游门禁包、阈值档案、审批、流量规则、监控查询和回滚资产。下一阶段只追加观察窗口和新证据；绑定项变化时显式列入 `invalidated_checks`。
+
+`decision`、`actor_authorization` 和 `action_progress` 是独立状态轴。回滚方案已经批准不等于当前操作者获权；事实足以确定 NO_GO/ROLLBACK 时，操作者无权不能把 `decision` 改成 BLOCKED。只有送达、接管、操作日志、结果或恢复验证证据才能依次声称 REQUESTED、ACKNOWLEDGED/IN_PROGRESS、COMPLETED 或 RECOVERY_VERIFIED；失败、不安全或部分完成也必须附证据。
 
 ## 灰度增量更新
 
@@ -53,6 +58,7 @@ handoff_packet:
 
 ## 决策
 - 状态：GO / CONDITIONAL_GO / NO_GO / BLOCKED / ROLLBACK
+- actor_authorization / authorized_operator / action_progress：
 - 上游测试 machine_status：PASS / PASS_WITH_ACCEPTED_RISK / FAIL / PAUSED / BLOCKED
 - Agent mode_execution_status / offline_gate / online_quality_signal：
 - 关键依据：
@@ -97,6 +103,7 @@ handoff_packet:
 
 ```markdown
 # [项目/版本] 回滚记录
+- 门禁决定、actor_authorization / authorized_operator / action_progress：
 - 触发时间、条件和证据：
 - 影响范围与异常等级：
 - 停止放量时间：

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Code Against Spec"
+  short_description: "Review a diff for standards and spec"
+  default_prompt: "Use $review-code-against-spec to review this diff against repository standards and its originating spec."

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Route Engineering Work"
+  short_description: "Choose the right engineering workflow"
+  default_prompt: "Use $route-engineering-work to choose the best workflow for this engineering request."
+policy:
+  allow_implicit_invocation: false

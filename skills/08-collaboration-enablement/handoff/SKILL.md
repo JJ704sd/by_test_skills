@@ -1,16 +1,25 @@
 ---
 name: handoff
-description: Compact the current conversation into a handoff document for another agent to pick up.
-argument-hint: "What will the next session be used for?"
-disable-model-invocation: true
+description: 将当前工作压缩成可移植的 Markdown 交接文档，供新的 Agent、会话、目录或同事继续。仅在用户明确要求跨上下文接手或保存可恢复状态时使用；普通进度摘要继续在当前会话回答。
 ---
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the temporary directory of the user's OS - not the current workspace.
+# 创建交接文档
 
-Include a "suggested skills" section in the document, which suggests skills that the agent should invoke.
+把文档保存到操作系统临时目录，不写入当前工作区。使用清晰文件名，并在完成后返回绝对路径。
 
-Do not duplicate content already captured in other artifacts (specs, plans, ADRs, issues, commits, diffs). Reference them by path or URL instead.
+至少包含：
 
-Redact any sensitive information, such as API keys, passwords, or personally identifiable information.
+1. **目标与接手范围**：下一会话要完成什么；用户参数作为重点。
+2. **当前状态**：已完成、正在进行、尚未开始，以及最后可验证结果。
+3. **决策与约束**：已确认选择、授权边界、假设、风险和不能改变的要求。
+4. **剩余工作**：按依赖排序的下一动作、阻塞项、所需输入和完成标准。
+5. **证据与入口**：相关 specs、plans、ADRs、issues、commits、diffs、日志和产物的路径或 URL。
+6. **Suggested skills**：下一 Agent 应使用的技能及触发条件。
 
-If the user passed arguments, treat them as a description of what the next session will focus on and tailor the doc accordingly.
+规则：
+
+- 引用已有产物，不复制其完整内容。
+- 只写已验证事实；不把计划写成已执行。
+- 删除 API key、密码、Token、Cookie、个人身份信息和不必要的内部数据。
+- 保留恢复工作所需的精确命令、版本、文件路径和未提交状态，但不嵌入 Secret。
+- 文档应让未见过本会话的 Agent 能从第一个未完成动作继续。

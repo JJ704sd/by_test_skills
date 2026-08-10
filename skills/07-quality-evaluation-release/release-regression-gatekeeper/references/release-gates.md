@@ -32,6 +32,20 @@ Hotfix 仅允许项目负责人审批记录事后补录；部署前仍需在线�
 
 禁止无审批、无文档、无验证的发布。记录版本、时间、操作人、阶段、结果和异常处置。
 
+## 决策状态与上游映射
+
+- GO：全部硬门禁有证据，发布方式、观察和回滚条件已确认。
+- CONDITIONAL_GO：硬门禁满足，仅有已批准的非阻塞风险和补偿计划。
+- NO_GO：尚未改变生产时，硬门禁失败或风险不可接受。
+- BLOCKED：证据、环境、审批、监控或阈值无法核实；不得开始或继续放量。
+- ROLLBACK：生产变更已开始并命中硬回滚条件；立即停止并恢复稳定版本或配置。
+
+上游状态不得静默放行：测试 PAUSED/BLOCKED 映射为 BLOCKED；测试或 Agent FAIL 在部署前映射为 NO_GO，生产变更开始后按适用硬条件映射为 ROLLBACK；Agent REVIEW_REQUIRED/BLOCKED 映射为 BLOCKED。PASS_WITH_ACCEPTED_RISK 仅在发布责任人重新确认风险后才可能映射为 CONDITIONAL_GO。
+
+测试流程交接必须带 `decision_point=EXIT_GATE`；准入、继续/暂停、执行完成或生命周期关闭结论都不能替代测试准出证据。
+
+Agent 在线 OK 只表示无新增在线阻塞；WATCH 保持阶段；NOT_APPLICABLE 必须有批准依据；STOP_RECOMMENDED 先停止推进，再按已批准条件判 NO_GO、BLOCKED 或 ROLLBACK，不能视为已回滚。
+
 ## 异常升级
 
 - `defect_severity=P0`：立即上报项目负责人，目标 5 分钟内响应。

@@ -1,22 +1,33 @@
 ---
 name: grilling
-description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+description: Interview the current user in rounds to stress-test a plan, decision, or idea. Use stateless mode for live clarification, or documented mode with $domain-modeling to persist resolved terms and ADRs; use $to-questionnaire for knowledge held by someone else.
 ---
 
-Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
+# Grilling
 
-Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled — the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
+Use a design tree: each decision unlocks the decisions that depend on it. The frontier is every question whose prerequisites are already settled.
 
-Each question should be formatted like so:
+## Choose the mode
 
+- **Stateless mode is the default.** Conduct the interview without creating domain documents.
+- **Documented mode** applies when the user explicitly wants resolved vocabulary or durable decisions recorded in a repository. Run `$domain-modeling` alongside the interview and persist only settled outcomes.
+
+Do not switch into documented mode merely because a working directory exists.
+
+## Work in rounds
+
+1. Build the current decision tree from the conversation and inspected evidence.
+2. Ask the whole frontier in one numbered round. Give a recommended answer for every genuine decision.
+3. Wait for the user's answers before asking questions that depend on them.
+4. Recompute the tree after every round; answers may add, remove, or reorder branches.
+
+Format each item clearly:
+
+```text
+Q1 — <short title>: <question and concise choices>
+Recommended: <answer and reason>
 ```
-❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
 
-➡️ <your recommended answer>
-```
+Finding facts is the agent's job. Inspect the environment or delegate bounded research instead of asking the user for discoverable facts. If an investigation is still running, ask the rest of the independent frontier now and defer only dependent questions.
 
-Each round the user answers reshapes the tree — settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
-
-Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch a sub-agent to find it — don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report — ask the rest of the frontier now. The _decisions_ are the user's — put each to them and wait.
-
-The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.
+The interview ends when the frontier is empty and the user confirms the shared understanding. Do not begin implementation as an implicit continuation of the interview.

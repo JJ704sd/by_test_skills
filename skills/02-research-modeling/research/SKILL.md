@@ -1,12 +1,13 @@
 ---
 name: research
-description: Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.
+description: Investigate a question against high-trust primary sources and save cited findings as a Markdown file in the repository. Use for verifiable documentation, API, specification, or source-code facts; use $to-questionnaire instead when the missing knowledge is private to another person.
 ---
 
-Spin up a **background agent** to do the research, so you keep working while it reads.
+# Research
 
-Its job:
+Delegate the investigation to a background agent when one is available so other work can continue. If delegation is unavailable, perform the same workflow in the current session.
 
-1. Investigate the question against **primary sources** — official docs, source code, specs, first-party APIs — not a secondary write-up of them. Follow every claim back to the source that owns it.
-2. Write the findings to a single Markdown file, citing each claim's source.
-3. Save it where the repo already keeps such notes; match the existing convention, and if there is none, put it somewhere sensible and say where.
+1. Trace each material claim to the primary source that owns it: official documentation, specifications, source code, or first-party APIs.
+2. Prefer direct evidence over secondary summaries and record uncertainty or conflicting sources explicitly.
+3. Write one cited Markdown report where the repository already keeps research notes. If no convention exists, choose a sensible location and report it.
+4. Return the report path and a concise summary of the findings that affect the caller's decision.

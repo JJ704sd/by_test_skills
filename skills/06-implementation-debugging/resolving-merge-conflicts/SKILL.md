@@ -1,14 +1,16 @@
 ---
 name: resolving-merge-conflicts
-description: "Use when you need to resolve an in-progress git merge/rebase conflict."
+description: Resolve an in-progress Git merge or rebase conflict by reconstructing both sides' intent, validating the result, and safely continuing the operation. Use only when Git reports unresolved merge or rebase conflicts.
 ---
 
-1. **See the current state** of the merge/rebase. Check git history, and the conflicting files.
+# Resolving Merge Conflicts
 
-2. **Find the primary sources** for each conflict. Understand deeply why each change was made, and what the original intent was. Read the commit messages, check the PRs, check original issues/tickets.
+1. Inspect `git status`, the current merge or rebase state, recent history, conflicting paths, and any unrelated working-tree changes. Preserve unrelated user work.
+2. Trace each side to its primary source: commits, code history, available PR context, issues, specs, and tests. Use external sources only when available and relevant.
+3. Resolve each hunk to preserve both intents where compatible. When they conflict, follow the merge goal and report the trade-off. Do not invent unrelated behavior.
+4. If evidence indicates the operation should be aborted, explain why and ask the user to decide. Do not run `--abort` autonomously.
+5. Stage only the resolved conflict paths, using explicit path arguments. Never stage the whole working tree or sweep in unrelated changes.
+6. Run the smallest relevant format, type, build, and test checks, then inspect `git diff --check` and the staged diff.
+7. Continue the merge or rebase only when finishing it is within the user's request. For a rebase, handle later conflicts one commit at a time. Do not create an extra commit or push unless requested or required by the already-authorized Git operation.
 
-3. **Resolve each hunk.** Preserve both intents where possible. Where incompatible, pick the one matching the merge's stated goal and note the trade-off. Do **not** invent new behaviour. Always resolve; never `--abort`.
-
-4. Discover the project's **automated checks** and run them — typically typecheck, then tests, then format. Fix anything the merge broke.
-
-5. **Finish the merge/rebase.** Stage everything and commit. If rebasing, continue the rebase process until all commits are rebased.
+Report resolved files, intent decisions, checks run, remaining conflicts, and whether the Git operation was continued.

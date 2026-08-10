@@ -1,0 +1,6 @@
+interface:
+  display_name: "Run Learning Workspace"
+  short_description: "Continue a persistent, mission-led learning workspace"
+  default_prompt: "Use $run-learning-workspace to continue my learning plan from the current workspace."
+policy:
+  allow_implicit_invocation: false
