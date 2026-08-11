@@ -151,7 +151,7 @@
 | `wait-what` | 普通重新解释请求，不需要技能 |
 | `writing-for-agents` | 系统 `skill-creator` 或普通 Agent 指令编辑 |
 
-完整设计理由见 [Skills 精简与整理设计规范](skill-simplification-spec.md)。
+第一轮迁移理由见 [Skills 精简与整理设计规范](skill-simplification-spec.md)；第二轮运行时上下文与质量 reference 精简见 [针对性精简设计规范 v2](targeted-skill-simplification-spec.md)。
 
 ## 资源与维护边界
 
@@ -159,6 +159,6 @@
 2. `references/` 保存按分支读取的规则、方法和字段契约。
 3. `assets/` 保存复制或改造成输出的模板与脚手架。
 4. `scripts/` 保存需要实际运行和测试的确定性帮助程序。
-5. 技能根目录不放配套文件；所有 reference 从 `SKILL.md` 一层直达。
+5. 技能根目录不放配套文件；所有 reference、asset 和 script 从所属 `SKILL.md` 一层直达。
 6. 新增、删除、移动或改变技能职责时，同步更新本页、README 和校验预算。
 7. 提交前运行 `pwsh -File scripts/Test-Skills.ps1` 和 `git diff --check`。

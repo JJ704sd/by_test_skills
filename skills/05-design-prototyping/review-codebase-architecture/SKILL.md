@@ -15,7 +15,7 @@ Find architectural friction and rank opportunities to deepen modules. Do not imp
 
 ## 2. Explore
 
-Use a sub-agent for an independent scan when available; otherwise inspect directly. Look for:
+Perform an evidence-led scan, keeping candidate discovery separate from detailed design. Look for:
 
 - concepts spread across many shallow modules;
 - interfaces nearly as complex as their implementations;

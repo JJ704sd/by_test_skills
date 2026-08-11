@@ -5,8 +5,6 @@ description: Investigate a question against high-trust primary sources and save 
 
 # Research
 
-Delegate the investigation to a background agent when one is available so other work can continue. If delegation is unavailable, perform the same workflow in the current session.
-
 1. Trace each material claim to the primary source that owns it: official documentation, specifications, source code, or first-party APIs.
 2. Prefer direct evidence over secondary summaries and record uncertainty or conflicting sources explicitly.
 3. Write one cited Markdown report where the repository already keeps research notes. If no convention exists, choose a sensible location and report it.

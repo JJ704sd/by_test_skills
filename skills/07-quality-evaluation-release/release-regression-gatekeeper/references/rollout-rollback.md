@@ -9,9 +9,8 @@ metric_id:
 metric_definition:
 profile_version:
 scope:
-source_layer: primary_spec | cross_spec | project_approved | governance_enhancement
 source_ref:
-policy_class: project_approved | spec_default | spec_placeholder
+approval_status: APPROVED | UNAPPROVED
 direction_and_operator:
 value_and_unit:
 aggregation_or_percentile:
@@ -24,7 +23,7 @@ evidence_ref:
 approved_by:
 ```
 
-数字缺少公式、窗口或样本时不得临时解释；`spec_placeholder` 未量化时对应阶段为 `BLOCKED`，不能开始或继续放量。
+数字缺少公式、窗口、样本或批准时不得临时解释；未量化条件使对应阶段 `BLOCKED`，不能开始或继续放量。
 
 ## Agent 灰度
 

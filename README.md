@@ -87,12 +87,16 @@ powershell -ExecutionPolicy Bypass -File scripts/Test-Skills.ps1
 pwsh -File scripts/Test-Skills.ps1
 ```
 
-校验覆盖场景编号、技能数量与命名、上下文预算、frontmatter、`agents/openai.yaml`、资源分层、长 reference 导航、相对链接和旧技能引用。相同检查会在 push 和 Pull Request 时由 GitHub Actions 执行。
+校验覆盖场景编号、技能数量与命名、上下文预算、frontmatter、`agents/openai.yaml`、资源分层与直达路由、长 reference 导航、相对链接和旧技能引用。相同检查会在 push 和 Pull Request 时由 GitHub Actions 执行。
 
 ## 维护约定
 
 - 场景目录使用连续的 `NN-kebab-case`；技能目录使用唯一的 kebab-case 名称。
 - `SKILL.md` frontmatter 只包含 `name` 与 `description`，且正文不超过 100 行。
 - 触发和排除条件写在 `description`；分支细节放在 `references/`，输出模板放在 `assets/`。
+- 每个 `references/`、`assets/` 和 `scripts/` 文件都必须从所属 `SKILL.md` 直接路由。
 - `agents/openai.yaml` 必须包含 `display_name`、`short_description` 和引用 `$skill-name` 的 `default_prompt`。
+- 当前总预算为 900 行 / 50,000 字符；07 质量组主入口不超过 225 行，文本资源不超过 1,800 行。
 - 新增、删除、移动或改变技能职责后，同步更新分布文档和校验预算。
+
+第二轮精简的范围、批次和行为不变量见 [针对性精简设计规范 v2](docs/targeted-skill-simplification-spec.md)。

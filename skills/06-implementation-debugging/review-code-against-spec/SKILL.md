@@ -38,7 +38,7 @@ Repository rules override the baseline. Treat baseline smells as judgement calls
 
 ## 4. Run independent reviews
 
-Run the axes in parallel sub-agents when available so one conclusion does not anchor the other. Give each pass the raw diff command, commit list, changed files, and only its axis-specific sources. If parallel agents are unavailable, perform two clearly separated passes.
+Run two clearly separated passes so one conclusion does not anchor the other. Give each pass the raw diff, commit list, changed files, and only its axis-specific sources.
 
 **Standards pass**
 

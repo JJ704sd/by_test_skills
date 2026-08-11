@@ -30,17 +30,14 @@ If `docs/agents/issue-tracker.md` is missing and the workflow needs issues, spec
 | Knowledge held by another person must be collected asynchronously | `$to-questionnaire` |
 | Domain vocabulary or a durable architectural decision needs updating | `$domain-modeling` |
 | A merge or rebase conflict is already in progress | `$resolving-merge-conflicts` |
+| Test scope, risk depth, criteria, or cases must be designed | `$test-scope-case-designer` |
+| Test tools, environments, permissions, or lifecycle must be selected or audited | `$test-tool-governor` |
+| A build needs a test entry, pause, exit, or lifecycle gate | `$test-process-governor` |
+| A nondeterministic Agent needs repeated evaluation, a baseline, or drift signals | `$agent-nondeterministic-evaluator` |
+| Regression depth, release, rollout, stop, or rollback must be decided | `$release-regression-gatekeeper` |
 | Work must move to another person, repository, directory, or harness | `$handoff` |
 | Only a human can complete an external setup step | `$wizard` |
 | A persistent multi-session learning workspace should be started or resumed | `$run-learning-workspace` |
 
 Ordinary scoped implementation does not need a wrapper skill. Use `$tdd` only when test-first execution is requested, and `$review-code-against-spec` only when a formal review is needed.
-
-## Important boundaries
-
-- `$wayfinder` discovers a route through decision tickets; `$to-tickets` expresses an already-known route as implementation tickets.
-- `$triage` handles raw inbound requests; `$to-tickets` creates approved internal work.
-- `$research` finds verifiable source facts; `$to-questionnaire` gathers private human knowledge.
-- `$review-codebase-architecture` finds candidates; `$codebase-design` designs one selected candidate.
-
-For context-window and phase handoffs, read [references/phase-boundaries.md](references/phase-boundaries.md).
+For ambiguous phase boundaries or context-window handoffs, read [references/phase-boundaries.md](references/phase-boundaries.md).
