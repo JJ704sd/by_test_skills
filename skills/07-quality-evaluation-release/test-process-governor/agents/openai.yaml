@@ -1,4 +1,4 @@
 interface:
   display_name: "测试流程治理"
-  short_description: "增量编排测试全流程，快速判定准入、暂停、准出与交接门禁"
-  default_prompt: "使用 $test-process-governor 复用现有证据并按最小必要模式判定当前测试门禁，输出增量台账与下游交接包。"
+  short_description: "治理测试阶段、执行证据、准入、暂停、准出与生命周期关闭"
+  default_prompt: "使用 $test-process-governor 判定当前测试阶段门禁，并输出证据、阻塞与重新判定条件。"

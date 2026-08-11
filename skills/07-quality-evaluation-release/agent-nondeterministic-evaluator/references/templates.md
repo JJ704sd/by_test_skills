@@ -1,12 +1,11 @@
-# Agent 评测输入输出模板
+# Agent 评测契约与模板
 
 ## 目录
 
 - [输入契约](#输入契约)
-- [JSON 用例](#json-用例)
-- [输出契约](#输出契约)
-- [跨技能交接包](#跨技能交接包)
-- [评测报告](#评测报告)
+- [用例契约](#用例契约)
+- [结果与交接](#结果与交接)
+- [报告骨架](#报告骨架)
 
 ## 输入契约
 
@@ -14,209 +13,122 @@
 mode: evaluate | create_baseline | online_monitor
 execution_depth: preflight | impacted | required_gate
 change_manifest:
-  summary:
+  summary: null
   changed_components: []
 agent_manifest:
-  agent_version:
-  prompt_version:
-  model_and_parameters:
-  rule_version:
-  tool_definition_version:
-  knowledge_base_version:
-  output_schema_version:
+  agent_version: null
+  prompt_model_rules_tools_knowledge_schema: []
 dataset_manifest:
-  version:
-  counts_by_set:
-  sanitized: true | false
+  version: null
+  counts_by_set: {}
+  sanitized: false
 baseline_report:
   version: null
-  comparable: true | false | null
+  comparable: null
 threshold_profile:
   version: null
+  source_ref: null
   approval_status: APPROVED | UNAPPROVED
-  approved_by: null
+  scope: null
   metrics: []
 nfr_profile:
   version: null
-  source_layer: primary_spec | cross_spec | project_approved | governance_enhancement | null
-  source_refs: []
+  source_ref: null
   approval_status: APPROVED | UNAPPROVED | NOT_APPLICABLE
   workload_and_failure_model: null
-  metrics: []
-deterministic_gate_record:
+deterministic_gate:
   machine_status: PASS | PASS_WITH_ACCEPTED_RISK | FAIL | PAUSED | BLOCKED
   agent_relevant_subgate: PASS | FAIL | BLOCKED
-  evidence: null
-  accepted_risks: []
-# accepted_risks 项字段：id、approval_ref、impact_on_agent_evaluation（NONE/RELATED/UNKNOWN）、owner、due_at
+  evidence_ref: null
 environment_manifest:
-  environment:
-  runner_version:
-  retry_policy:
+  environment: null
+  runner_version: null
+  retry_policy: null
 execution_plan:
   dry_run_case_ids: []
   min_runs: null
   max_runs: null
   escalation_rule: null
   judge_cascade: [exact_schema, deterministic_rule, semantic_rubric, human_review]
-mode_inputs:
-  evaluate:
-    baseline_report_version: null
-  create_baseline:
-    reason: null
-    proposed_approvers: []
-  online_monitor:
-    approved_release_id: null
-    prior_offline_gate: PASS | null
-    rollout_stage: null
-    sampling_approval: null
 ```
 
-## JSON 用例
+在线模式还需批准的 release、既有 `offline_gate=PASS`、当前阶段和采样授权。首版基线需说明原因和批准角色。
+
+## 用例契约
 
 ```json
 {
-  "example_only": true,
-  "id": "AGENT-EXTRACT-001",
-  "input": "[脱敏输入]",
+  "id": "AGENT-001",
+  "input": "[sanitized input]",
   "context": [],
-  "expected_parse": {"field": "[已批准期望值]"},
-  "expected_fields": {"schema": "[版本化 Schema ID]"},
-  "constraints": ["[批准的业务或安全约束]"],
+  "expected": {},
+  "constraints": [],
   "judge": "exact+schema",
-  "labels": ["core", "entity", "regression"],
+  "labels": ["core"],
   "risk": "high",
-  "source": "[脱敏来源类别]",
-  "dataset_version": "[版本]",
-  "sample_policy_ref": "[批准策略或规范默认策略]"
+  "source": "[sanitized source class]",
+  "dataset_version": "[version]",
+  "sample_policy_ref": "[approved policy]"
 }
 ```
 
-## 输出契约
-
-```yaml
-run_manifest:
-  snapshot_id:
-  execution_depth:
-  dry_run_status:
-  cache_hits: []
-sample_policy:
-technical_results:
-  planned_runs:
-  valid_runs:
-  technical_failures:
-semantic_metrics:
-  metric_name:
-    numerator:
-    denominator:
-    value:
-    confidence_interval:
-    threshold:
-    baseline:
-    percentage_point_delta:
-    relative_delta:
-    status:
-failed_cases: []
-failure_clusters: []
-sampling_expansions: []
-manual_review_evidence: []
-nd_defects: []
-mode_result:
-  mode_execution_status: COMPLETED | REVIEW_REQUIRED | BLOCKED
-  offline_gate: PASS | FAIL | REVIEW_REQUIRED | BLOCKED | null
-  baseline_candidate_status: REVIEW_REQUIRED | null
-  prior_offline_gate: PASS | null
-online_quality_signal: OK | WATCH | STOP_RECOMMENDED | NOT_APPLICABLE | null
-operational_nfr_results: []
-handoff_to_release:
-feedback_candidates: []
-invalidation_triggers: []
-```
-
-## 跨技能交接包
+## 结果与交接
 
 ```yaml
 handoff_packet:
-  packet_version: 1
   producer: agent-nondeterministic-evaluator
   mode: evaluate | create_baseline | online_monitor
   execution_depth: preflight | impacted | required_gate
   project_version: null
   snapshot_id: null
-  upstream_packet_refs: []
   mode_execution_status: COMPLETED | REVIEW_REQUIRED | BLOCKED
   offline_gate: PASS | FAIL | REVIEW_REQUIRED | BLOCKED | null
   baseline_candidate_status: REVIEW_REQUIRED | null
   prior_offline_gate: PASS | null
   online_quality_signal: OK | WATCH | STOP_RECOMMENDED | NOT_APPLICABLE | null
+  run_counts:
+    planned: null
+    valid: null
+    technical_failures: null
+    semantic_failures: null
+  metric_results: []
+  failed_case_refs: []
+  failure_cluster_refs: []
+  manual_review_refs: []
+  operational_nfr_results: []
   artifact_refs: []
   blockers: []
-  failure_cluster_refs: []
-  next_skill: release-regression-gatekeeper | test-process-governor | null
   invalidation_triggers: []
 ```
 
-`snapshot_id` 绑定 Agent/Prompt/模型参数/规则/工具/知识库/Schema、数据集、阈值、环境、runner、Judge、采样与重试版本。任何一项变化时只失效依赖它的缓存和结论。
+`snapshot_id` 绑定 Agent 清单、数据集、阈值、环境、runner、Judge、采样和重试。任何绑定项变化时只失效依赖它的缓存和结论。
 
-深度约束：`preflight` 的 `offline_gate` 必须为 `null`；`impacted` 成功时只能为 `null/REVIEW_REQUIRED`，仅当按批准计划完整执行的硬门禁/高风险用例出现有效失败时可为 `FAIL`；`required_gate` 才可为 `PASS`。`online_monitor` 必须携带 `prior_offline_gate=PASS`，且不生成新的离线结论。
+深度约束：`preflight` 不产生离线门禁；`impacted` 成功不能 `PASS`，但批准计划中的硬失败可 `FAIL`；只有 `required_gate` 可 `PASS`。`online_monitor` 必须引用既有离线 `PASS`，且不生成新离线结论。
 
-## 评测报告
+## 报告骨架
 
 ```markdown
 # [Agent/版本] 非确定性评测报告
 
-## 门禁结论
-- 模式：evaluate / create_baseline / online_monitor
-- Mode execution：COMPLETED / REVIEW_REQUIRED / BLOCKED
-- evaluate Offline gate：PASS / FAIL / REVIEW_REQUIRED / BLOCKED / N/A
-- create_baseline candidate：REVIEW_REQUIRED / N/A
-- online_monitor prior Offline gate 引用：PASS / N/A（非 PASS 时本模式 BLOCKED）
-- Online signal：OK / WATCH / STOP_RECOMMENDED / N/A
-- 核心依据与发布门禁建议：
+## 结论
+- mode / depth / execution_status：
+- offline_gate / baseline_candidate / online_signal：
+- 核心依据与发布建议：
 
-## 运行清单
-- 候选与基线版本：
-- Prompt/模型参数/规则/工具/知识库/Schema：
-- 测试集、环境、脚本、采样和重试：
-- 可比性、假设和缺失证据：
+## 清单与可比性
+- Agent、Prompt、模型、规则、工具、知识库和 Schema：
+- 数据集、环境、runner、采样、重试和 Judge：
+- 基线可比性、批准、假设和缺口：
 
-## 技术与语义执行
-- 计划/有效运行、技术失败、语义失败：
-- 人工抽检数量、选择方式和覆盖维度：
-- 专项测试及频率状态：
-
-## 指标
-| 维度 | 分子/分母 | 当前值 | 阈值 | 基线 | 点变化 | 相对变化 | 结论 |
+## 执行与指标
+- 计划/有效运行、技术/语义失败、人工复核：
+| 指标 | 分子/分母 | 当前 | 阈值 | 基线 | 点变化 | 相对变化 | 结论 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 实体抽取 | | | | | | | |
-| 单位归一化 | | | | | | | |
-| 计算正确性 | | | | | | | |
-| 指令/约束 | | | | | | | |
-| 推荐合理性 | | | | | | | |
-| 输出格式 | | | | | | | |
-| 鲁棒性 | | | | | | | |
-| 一致性差异 | | | | | | | |
-| 幻觉 | | | | | | | |
-| 安全拒绝 | | | | | | | |
 
-## 失败、缺陷与归因
-- 通用缺陷 / ND-P0-P3：
-- 失败样本、Trace、人工复核：
-- 归因假设、责任人和验证计划：
-
-## 在线质量（如适用）
-- 请求/解析成功率、用户修正率、负面反馈、延迟、工具/Schema 异常：
-- 样本量、观察时长和停止信号：
-
-## 运行 NFR（如适用）
-- nfr_profile 版本、source_layer/具体来源、批准、负载/故障、环境和基线：
-- 端到端/模型/检索/工具延迟、吞吐/并发、技术成功、降级/恢复：
-- 负载/故障下语义质量、安全、Schema、Token/成本和证据：
-
-## 归档与回流
-- 归档位置：
-- 新增核心/增量/鲁棒/对抗/长尾用例：
-- 给发布门禁的交接：
+## 失败与证据
+- 高风险逐次结果、失败簇、ND 缺陷和归因假设：
+- 在线信号或运行 NFR（适用时）：
+- 原始结果、日志、Trace、报告、归档和回流：
 ```
 
-最终化前不得残留占位符、空阈值档案或虚构批准。未知值使用 `null/UNKNOWN` 并触发 `REVIEW_REQUIRED` 或 `BLOCKED`；每个 0 结果也必须带分母、窗口和证据。
+最终化前不得残留占位符、空阈值档案或虚构批准。未知值使用 `null/UNKNOWN` 并映射到适用的 `REVIEW_REQUIRED` 或 `BLOCKED`；0 结果也需分母、窗口和证据。

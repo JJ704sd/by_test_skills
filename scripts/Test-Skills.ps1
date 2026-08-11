@@ -9,10 +9,15 @@ $errors = [System.Collections.Generic.List[string]]::new()
 $expectedScenarioCount = 8
 $expectedSkillCount = 25
 $maxSkillLines = 100
-$maxTotalSkillLines = 1600
-$maxTotalSkillChars = 100000
+$maxTotalSkillLines = 900
+$maxTotalSkillChars = 50000
+$qualityGroupName = '07-quality-evaluation-release'
+$maxQualitySkillLines = 225
+$maxQualityResourceLines = 1800
+$maxSkillNameChars = 64
 $maxDescriptionChars = 300
 $allowedSkillDirectories = @('agents', 'assets', 'references', 'scripts')
+$textResourceExtensions = @('.md', '.yaml', '.yml', '.sh', '.ps1')
 $retiredSkillNames = @(
     'ask-matt',
     'setup-matt-pocock-skills',
@@ -114,6 +119,9 @@ foreach ($directory in $skillDirectories) {
     if ($directory.Name -cnotmatch '^[a-z0-9]+(?:-[a-z0-9]+)*$') {
         $errors.Add("${relativeSkill}: skill directory name must use kebab-case")
     }
+    elseif ($directory.Name.Length -gt $maxSkillNameChars) {
+        $errors.Add("${relativeSkill}: skill name has $($directory.Name.Length) characters; maximum is $maxSkillNameChars")
+    }
 
     if (-not $seenSkillNames.Add($directory.Name)) {
         $errors.Add("${relativeSkill}: duplicate skill directory name '$($directory.Name)'")
@@ -143,6 +151,20 @@ foreach ($directory in $skillDirectories) {
 
     if ($skillLines.Count -gt $maxSkillLines) {
         $errors.Add("${relativeSkill}: SKILL.md has $($skillLines.Count) lines; maximum is $maxSkillLines")
+    }
+
+    foreach ($resourceDirectoryName in @('references', 'assets', 'scripts')) {
+        $resourceDirectory = Join-Path $directory.FullName $resourceDirectoryName
+        if (-not (Test-Path -LiteralPath $resourceDirectory -PathType Container)) {
+            continue
+        }
+
+        foreach ($resourceFile in @(Get-ChildItem -LiteralPath $resourceDirectory -Recurse -File)) {
+            $relativeResource = $resourceFile.FullName.Substring($directory.FullName.Length + 1).Replace('\', '/')
+            if (-not $content.Contains($relativeResource)) {
+                $errors.Add("${relativeSkill}: resource is not directly routed from SKILL.md: $relativeResource")
+            }
+        }
     }
 
     if ($content -notmatch '(?s)^---\r?\n(.*?)\r?\n---(?:\r?\n|$)') {
@@ -182,6 +204,9 @@ foreach ($directory in $skillDirectories) {
             $description = $descriptionMatch.Groups[1].Value.Trim().Trim('"').Trim("'")
             if ($description.Length -gt $maxDescriptionChars) {
                 $errors.Add("${relativeSkill}: description has $($description.Length) characters; maximum is $maxDescriptionChars")
+            }
+            if ($description -match '[<>]') {
+                $errors.Add("${relativeSkill}: description cannot contain angle brackets")
             }
         }
     }
@@ -313,6 +338,43 @@ if ($totalSkillChars -gt $maxTotalSkillChars) {
     $errors.Add("skills/: SKILL.md total is $totalSkillChars characters; maximum is $maxTotalSkillChars")
 }
 
+$qualityGroup = Join-Path $skillsRoot $qualityGroupName
+$qualitySkillLines = 0
+$qualityResourceLines = 0
+
+if (-not (Test-Path -LiteralPath $qualityGroup -PathType Container)) {
+    $errors.Add("skills/: missing required quality group '$qualityGroupName'")
+}
+else {
+    $qualitySkillFiles = @(Get-ChildItem -LiteralPath $qualityGroup -Recurse -File -Filter 'SKILL.md')
+    $qualitySkillLines = (
+        $qualitySkillFiles |
+            ForEach-Object { @(Get-Content -LiteralPath $_.FullName -Encoding UTF8).Count } |
+            Measure-Object -Sum
+    ).Sum
+    $qualityResourceFiles = @(
+        Get-ChildItem -LiteralPath $qualityGroup -Recurse -File |
+            Where-Object {
+                $_.Name -cne 'SKILL.md' -and
+                $_.FullName -notmatch '\\agents\\' -and
+                $_.Extension -in $textResourceExtensions
+            }
+    )
+    $qualityResourceLines = (
+        $qualityResourceFiles |
+            ForEach-Object { @(Get-Content -LiteralPath $_.FullName -Encoding UTF8).Count } |
+            Measure-Object -Sum
+    ).Sum
+}
+
+if ($qualitySkillLines -gt $maxQualitySkillLines) {
+    $errors.Add("${qualityGroupName}: SKILL.md total is $qualitySkillLines lines; maximum is $maxQualitySkillLines")
+}
+
+if ($qualityResourceLines -gt $maxQualityResourceLines) {
+    $errors.Add("${qualityGroupName}: text resources total $qualityResourceLines lines; maximum is $maxQualityResourceLines")
+}
+
 if ($errors.Count -gt 0) {
     Write-Host "Skill validation failed with $($errors.Count) error(s):" -ForegroundColor Red
     $errors | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
@@ -324,6 +386,8 @@ Write-Host "  Scenario groups:  $($groupDirectories.Count)"
 Write-Host "  Skills:           $($skillDirectories.Count)"
 Write-Host "  SKILL.md lines:   $totalSkillLines"
 Write-Host "  SKILL.md chars:   $totalSkillChars"
+Write-Host "  Quality SKILLs:   $qualitySkillLines lines"
+Write-Host "  Quality resources: $qualityResourceLines lines"
 Write-Host "  References:       $referenceCount"
 Write-Host "  Assets:           $assetCount"
 Write-Host "  Skill scripts:    $scriptCount"

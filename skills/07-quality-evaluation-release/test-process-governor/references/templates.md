@@ -1,105 +1,59 @@
 # 测试流程输出模板
 
-## 目录
+同一 `project_version + scope + decision_point` 只维护一份活动快照并保留历史。下游引用 `snapshot_id`；绑定项变化时只重验受影响结论。
 
-- [证据快照与跨技能交接](#证据快照与跨技能交接)
-- [快速门禁答复](#快速门禁答复)
-- [阶段台账](#阶段台账)
-- [缺陷记录](#缺陷记录)
-- [测试报告](#测试报告)
-
-## 证据快照与跨技能交接
-
-同一 `project_version + scope + stage/gate` 只维护一份活动快照，并保留不可覆盖的历史快照。下游直接引用 `snapshot_id`；仅在失效条件命中时重取相关事实。
+## 证据快照与交接
 
 ```yaml
 handoff_packet:
-  packet_version: 1
   producer: test-process-governor
   delivery_mode: gate_only | stage_packet | full_lifecycle
   project_version: null
   snapshot_id: null
   upstream_packet_refs: []
-  decision:
-    decision_point: ENTRY_GATE | CONTINUE_OR_PAUSE | EXIT_GATE | EXECUTION_COMPLETION | LIFECYCLE_CLOSURE | null
-    human_status: null
-    machine_status: PASS | PASS_WITH_ACCEPTED_RISK | FAIL | PAUSED | BLOCKED | NOT_APPLICABLE | null
-  test_execution_status: NOT_STARTED | IN_PROGRESS | COMPLETED | PAUSED | BLOCKED | null
-  test_lifecycle_status: OPEN | READY_TO_CLOSE | CLOSED | null
-  reused_evidence: []
-  changed_facts: []
-  completed_checks: []
+  decision_point: ENTRY_GATE | CONTINUE_OR_PAUSE | EXIT_GATE | EXECUTION_COMPLETION | LIFECYCLE_CLOSURE
+  machine_status: PASS | PASS_WITH_ACCEPTED_RISK | FAIL | PAUSED | BLOCKED | NOT_APPLICABLE
+  test_execution_status: NOT_STARTED | IN_PROGRESS | COMPLETED | PAUSED | BLOCKED
+  test_lifecycle_status: OPEN | READY_TO_CLOSE | CLOSED
   artifact_refs: []
   blockers: []
   accepted_risks: []
-  next_skill: null
   next_action: null
   invalidation_triggers: []
 ```
 
-`snapshot_id` 至少绑定版本/build、范围、当前阶段/门禁、需求/变更、范围/用例、环境/配置、阈值配置和证据查询时间。任何绑定项变化时只使受影响结论失效，不自动推翻无关事实。
+`snapshot_id` 绑定 build、范围、门禁、用例、环境、配置、阈值和证据时间。门禁、执行进度和生命周期是独立状态轴：`EXECUTION_COMPLETION` 使用 `machine_status=NOT_APPLICABLE`；测试准出必须是 `EXIT_GATE`。
 
-`decision_point` 是机器交接的必填语义，不能用准入或执行完成结论替代准出。ENTRY_GATE 与 EXIT_GATE 使用门禁状态；CONTINUE_OR_PAUSE 命中暂停条件时返回 PAUSED；EXECUTION_COMPLETION 使用 `machine_status=NOT_APPLICABLE` 并只更新执行进度，执行完成不代表测试通过；LIFECYCLE_CLOSURE 在关闭条件已满足、已知未满足或无法核实时分别返回 PASS、FAIL 或 BLOCKED。
-
-`test_execution_status` 只表示执行进度，不表示通过。EXIT_GATE 达成且报告、遗留跟踪和发布交接均已归档时，生命周期从 OPEN 进入 READY_TO_CLOSE；关闭动作有证据后才是 CLOSED。三个状态轴不得相互推定。
-
-## 快速门禁答复
+## 快速门禁
 
 ```markdown
-- delivery_mode：gate_only
-- 当前决策点 / 结论 / machine_status：
+- 决策点 / machine_status：
 - test_execution_status / test_lifecycle_status：
-- 关键通过证据：
-- 首个硬阻塞项：
-- 最小补充或整改：
-- 责任人 / 重新判定条件：
+- 关键证据 / 首个硬阻塞：
+- 最小整改 / 责任人 / 重新判定条件：
 - snapshot_id / 失效条件：
 ```
 
 ## 阶段台账
 
 ```markdown
-| 阶段 | 输入/版本 | 必做动作 | 输出与证据 | 责任人 | stage_status | gate_machine_status | 下一门禁 |
+| 阶段 | 版本/输入 | 必做动作 | 输出与证据 | 责任人 | stage_status | gate_status | 下一门禁 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 需求分析 | | | | | NOT_STARTED/IN_PROGRESS/COMPLETED/BLOCKED | PASS/PASS_WITH_ACCEPTED_RISK/FAIL/PAUSED/BLOCKED/NOT_APPLICABLE | |
-| 测试设计 | | | | | | | |
-| 开发与提测 | | | | | | | |
-| 版本测试 | | | | | | | |
-| 上线与复盘 | | | | | | | |
 ```
 
-`stage_status` 只表示生命周期进度；`gate_machine_status` 只表示门禁结论。没有门禁决策的阶段使用 `gate_machine_status=NOT_APPLICABLE`，两者不得相互推导。
+没有门禁的阶段使用 `gate_status=NOT_APPLICABLE`；阶段完成不能推导门禁通过。
 
 ## 缺陷记录
 
 ```markdown
-# [模块] [defect_severity=P0/P1/P2/P3/P4] [可观察的问题]
-
-## 基本信息
-- 发现版本/build：
-- 测试环境：
-- 影响用户/模块/接口/数据：
-- 当前状态与责任人：
-
-## 前置条件
-1. [账号、数据、权限、配置]
-
-## 复现步骤
-1. [操作]
-2. [操作]
-
-## 实际结果
-[结果、状态码、响应、截图、日志或 Trace ID]
-
-## 期望结果
-[可验证的业务或技术判据]
-
-## 修复与回归
-- 修复版本：
-- 修复影响范围：
-- 修复点结果：通过 / 失败 / 阻塞
-- 影响面回归结果：
-- 证据：
+# [模块] [P0-P4] [可观察问题]
+- build / 环境 / 影响 / 责任人：
+- 前置条件：
+- 复现步骤：
+- 实际结果与证据：
+- 期望判据：
+- 修复版本与影响范围：
+- 修复点 / 影响面回归：
 ```
 
 ## 测试报告
@@ -108,41 +62,23 @@ handoff_packet:
 # [项目/版本] 测试报告
 
 ## 结论
-- 当前阶段：
-- test_execution_status：NOT_STARTED / IN_PROGRESS / COMPLETED / PAUSED / BLOCKED
-- decision_point：ENTRY_GATE / CONTINUE_OR_PAUSE / EXIT_GATE / EXECUTION_COMPLETION / LIFECYCLE_CLOSURE
-- 当前决策状态：通过 / 有条件通过 / 不通过 / 暂停 / 待补证据 / 不适用
-- machine_status：PASS / PASS_WITH_ACCEPTED_RISK / FAIL / PAUSED / BLOCKED / NOT_APPLICABLE
-- test_lifecycle_status：OPEN / READY_TO_CLOSE / CLOSED
-- 发布建议：交由发布门禁评审 / 暂不交付发布
-- 关键依据：
+- decision_point / machine_status：
+- execution / lifecycle：
+- 关键依据、阻塞与发布交接：
 
-## 范围、版本与环境
-- 版本/build、配置、环境、数据：
-- 包含项、排除项及理由：
-- 测试类型与用例版本：
+## 范围与执行
+- build、配置、环境、数据、范围和用例版本：
+- 计划/执行/通过/失败/阻塞：
+- 冒烟、修复点、影响面回归和产品验收：
 
-## 执行结果
-- 计划/已执行/通过/失败/阻塞/执行率：
-- 冒烟结果：
-- 修复点与影响面回归：
-- 产品验收：
-
-## NFR 证据（适用时）
-- nfr_profile / threshold_profile 版本、批准状态与批准人：
-- 指标方向/公式/单位/聚合或百分位/基线/窗口：
-- 并发或到达率、Ramp-up、持续时长、故障模型、环境与数据：
-| NFR-ID | source_layer/来源版本 | 对象 | 目标/门禁 | 实际值 | 原始证据 | 缺陷/风险 | 结论 |
+## NFR（适用时）
+| NFR | source_ref / approval | 对象/窗口 | 目标 | 实际 | 负载/故障 | 证据 | 结论 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 
-## 缺陷与风险
-- defect_severity P0/P1/P2/P3/P4 数量、查询范围、查询时间与证据：
-- 遗留项、影响、规避/补偿、责任人、期限：
-- 未验证项和假设：
-
-## 证据与下一步
-- 用例、缺陷、日志/Trace、报告和审批位置：
-- 下一动作、负责人、完成条件：
+## 缺陷、风险与证据
+- P0-P4 数量、查询范围、时间和证据：
+- 遗留、补偿、责任人和期限：
+- 日志、Trace、报告、审批和下一动作：
 ```
 
-最终化前把所有占位符替换为事实或 `UNKNOWN`。只有未知项使当前门禁无法判定时才映射为 BLOCKED；已知硬失败或暂停条件优先，未知项作为次级证据缺口列出，不能覆盖 FAIL/PAUSED。数量为 0 时仍需提供查询范围、时间和证据引用。
+最终化前用事实或 `UNKNOWN` 替换占位符。已知硬失败/暂停条件优先于未知缺口；数量为 0 仍需查询范围、时间和证据。

@@ -1,4 +1,4 @@
 interface:
   display_name: "版本回归与发布门禁"
-  short_description: "增量审核回归与发布证据，治理放量、停止、回滚和发布关闭"
-  default_prompt: "使用 $release-regression-gatekeeper 复用发布快照，只审核当前决策点的增量证据并给出发布动作。"
+  short_description: "决定回归层级、发布、灰度、停止、回滚、恢复与发布关闭"
+  default_prompt: "使用 $release-regression-gatekeeper 审核发布证据并给出当前发布或回滚决策。"

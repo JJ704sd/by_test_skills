@@ -21,7 +21,7 @@
 4. 在 `description` 中同时说明能力、正向触发和关键排除条件；不要在正文另建 “When to use” 章节。
 5. 主文只保留每次调用都需要的流程和硬约束，并控制在 100 行以内。
 6. 详细规则、方法和示例放入 `references/`；复制或改造成输出的模板放入 `assets/`；确定性帮助程序放入 `scripts/`。
-7. reference 从 `SKILL.md` 一层直达；超过 100 行时添加 `## Contents` / `## 目录`，或继续精简。
+7. 每个 reference、asset 和 script 都从所属 `SKILL.md` 一层直达；reference 超过 100 行时添加 `## Contents` / `## 目录`，或继续精简。
 8. 添加或更新 `agents/openai.yaml`：
 
    ```yaml
@@ -33,6 +33,8 @@
 
 9. 仅显式调用的技能在 `agents/openai.yaml` 使用 `policy.allow_implicit_invocation: false`；不要在 `SKILL.md` 使用 `disable-model-invocation` 或 `argument-hint`。
 10. 技能之间的调用统一写成 `$skill-name`。
+
+仓库预算由校验器执行：全部 `SKILL.md` 不超过 900 行 / 50,000 字符；07 质量组 `SKILL.md` 不超过 225 行，文本资源不超过 1,800 行。新增内容应先证明它属于每次必读正文还是按需资源，而不是通过放宽预算解决。
 
 ## 安全边界
 
