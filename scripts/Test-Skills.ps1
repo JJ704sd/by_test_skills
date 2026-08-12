@@ -418,8 +418,8 @@ $strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
 $repositoryTextFiles = @(
     Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
         Where-Object {
-            $_.FullName -notmatch '[\\/]\.git[\\/]' -and
-            $_.FullName -notmatch '[\\/]tmp[\\/]' -and
+            $relativeCandidate = $_.FullName.Substring($repoRoot.Length).TrimStart([char[]]'\/')
+            $relativeCandidate -notmatch '^(?:\.git|tmp)(?:[\\/]|$)' -and
             $_.Extension -in $repositoryTextExtensions
         }
 )
