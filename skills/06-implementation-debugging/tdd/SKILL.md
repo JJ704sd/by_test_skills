@@ -1,42 +1,50 @@
 ---
 name: tdd
-description: Implement known behavior or a verified bug fix through a public seam using red-green-refactor. Use when the user explicitly requests TDD or test-first work, or when a known regression should be locked down before repair; use $diagnosing-bugs when the root cause is still unknown.
+description: Implement known behavior or a verified bug fix through a stable public seam using red-green-refactor. Use for requested TDD or test-first work, or to lock down a verified regression before repair; use $diagnosing-bugs while the cause or expected behavior remains unknown.
 ---
 
 # Test-Driven Development
 
-Deliver one observable behavior at a time through a stable public seam.
+Deliver one caller-observable behavior at a time through a stable public seam.
 
-Read `CONTEXT.md`, the governing spec, and relevant ADRs when present so test language matches the domain.
+Read applicable repository instructions, `CONTEXT.md`, the governing spec, relevant ADRs, and existing test conventions before editing.
 
 ## Establish the seam
 
-Identify the public interface through which a caller observes the behavior. Derive it from the spec and codebase when clear; ask the user only when choosing a different seam would materially change scope or architecture.
+Identify the interface through which a real caller observes the behavior. Derive it from the spec and codebase when clear; ask only when a different seam would materially change scope or architecture.
 
-Use $codebase-design before TDD when the interface shape itself is unresolved. Do not create tests against private methods or internal collaborators merely because they are convenient.
+Use `$codebase-design` first when the interface itself is unresolved. Do not test private methods or internal collaborators merely because they are convenient.
 
-## Red-green-refactor
+## Plan behavior slices
 
-Repeat for one vertical slice:
+Build a small behavior-slice graph from acceptance criteria to public seams, focused red commands, affected paths, and cross-slice dependencies. Keep one writer for the same public seam. Fan out only current-frontier slices with no cross-slice dependency that can demonstrate an independent red and have disjoint write sets, test state, and side effects; otherwise keep them serial. Parallelize only when critical-path savings exceed coordination cost.
 
-1. **Red**: write the smallest test that describes one observable behavior. Run it and confirm it fails for the expected reason.
-2. **Green**: implement only enough production code to pass that test. Run the focused test again.
-3. **Refactor**: improve names, duplication, and structure without changing behavior. Keep the suite green after every change.
+Give each worker a context capsule with objective or slice, pinned baseline, dependencies and constraints, allowed reads, writes, and side effects, commands and evidence, budget or stop condition, and risks. Each worker completes one slice through red-green-refactor. At fan-in, one integrator inspects the combined diff and creates a green checkpoint with cross-slice checks before opening the next frontier.
 
-Let each completed slice inform the next. Do not write all tests first or build layer by layer.
+## Repeat red-green-refactor
 
-## Test quality
+For one vertical behavior slice at a time:
 
-- Assert outcomes callers care about, not call counts or private state.
+1. **Red**: write the smallest behavior test and run it. Confirm it fails because the requested behavior is absent or wrong—not because of syntax, configuration, environment, or an unrelated baseline failure.
+2. **Green**: implement only enough production code to pass the new test. Run the focused test again.
+3. **Refactor**: improve names, duplication, and structure without changing behavior. Keep relevant tests green after each change.
+
+Do not write the entire test suite first or implement layer by layer. Do not enter green without the intended red. Stop or route to `$codebase-design` or `$diagnosing-bugs` when another attempt would repeat the same failure without new evidence.
+
+## Keep tests honest
+
+- Assert outcomes callers care about, not private state, call counts, or internal order.
 - Derive expected values from the spec, a worked example, or another independent source—not the implementation under test.
 - Prefer real in-process collaborators and realistic local stand-ins.
 - Replace only true external boundaries or nondeterministic sources such as time and randomness.
-- Avoid speculative cases and abstractions that the current behavior does not require.
+- Avoid speculative cases and abstractions beyond the current behavior.
 
-Read [references/tests.md](references/tests.md) when evaluating a proposed test or choosing a boundary substitute.
+Read [references/tests.md](references/tests.md) when evaluating a test seam, expectation, or boundary substitute.
 
-## Verification
+For explicitly behavior-preserving restructuring, use `$refactoring-safely` for the preservation proof instead of inventing a red state.
 
-Run the focused test on every cycle. Regularly run the smallest relevant test group and typecheck or equivalent static checks. At completion, run the broader project checks that are safe and relevant to the change.
+## Verify and report
 
-Report the seam used, behaviors added, checks run, and any residual risk. Use $review-code-against-spec only when the user requests a fixed-point Standards/Spec review.
+Run the focused test on every cycle. Regularly run the smallest relevant test group plus applicable static checks. At completion, run broader safe project checks in proportion to the change.
+
+Report the seam, behaviors added, red evidence, checks run, and residual risk. Do not claim TDD if the test never demonstrated the intended red state. Use `$review-code-against-spec` only when the user requests a fixed-point review.

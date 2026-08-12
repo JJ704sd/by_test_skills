@@ -23,7 +23,7 @@
 
 下列仓库基线只有写入批准的版本化阈值配置，补齐定义、范围、窗口、最小样本、缺失策略和证据查询后才生效；配置不完整时 `BLOCKED`，不产生 `STOP_RECOMMENDED`。
 
-命中任一项，向 `release-regression-gatekeeper` 发出 `STOP_RECOMMENDED` 并附证据：
+命中任一项，向 `release-gatekeeper` 发出 `STOP_RECOMMENDED` 并附证据：
 
 - 请求成功率 `<90%` 且持续超过 2 分钟。
 - 负面反馈率 `>5%`，并达到阈值配置中的窗口与最小样本。
@@ -38,7 +38,7 @@
 
 ## 缺陷分域
 
-通用确定性缺陷使用 `P0-P4`，由 `test-process-governor` 管理。Agent 随机规划、语义、上下文或生成行为使用 `ND-P0` 至 `ND-P3`：
+通用确定性缺陷使用 `P0-P4`，由 `test-execution-governor` 的 `lifecycle_gate` 模式管理。Agent 随机规划、语义、上下文或生成行为使用 `ND-P0` 至 `ND-P3`：
 
 | 等级 | 定义 | 示例 | 门禁 |
 | --- | --- | --- | --- |

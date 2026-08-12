@@ -1,4 +1,0 @@
-interface:
-  display_name: "Wizard"
-  short_description: "Generate an interactive setup wizard"
-  default_prompt: "Use $wizard to generate a safe interactive setup wizard for the manual steps in this task."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "测试流程治理"
-  short_description: "治理测试阶段、执行证据、准入、暂停、准出与生命周期关闭"
-  default_prompt: "使用 $test-process-governor 判定当前测试阶段门禁，并输出证据、阻塞与重新判定条件。"

@@ -1,61 +1,44 @@
 ---
 name: diagnosing-bugs
-description: Diagnose bugs with unknown causes, hard-to-reproduce or flaky failures, and performance regressions by building an evidence loop and testing falsifiable hypotheses. Use when the root cause is unknown; use $tdd when the behavior or cause is already known and the task is to implement a fix test-first.
+description: Diagnose unknown failures, flakes, and performance regressions through reproducible evidence, falsifiable hypotheses, profiling, and controlled experiments. Use while the cause or limiting resource is unknown; stop at diagnosis unless repair is explicitly requested.
 ---
 
-# Diagnosing Bugs
+# Diagnosing Bugs and Performance
 
-Default to diagnosis, not repair. Finish with a reproducible symptom, a verified root cause, supporting evidence, and a recommended fix.
+Finish with a reproduced symptom or workload, verified cause or limiting resource, evidence, uncertainty, and smallest recommendation.
 
-Read `CONTEXT.md` and relevant ADRs when present.
+Read repository instructions, `CONTEXT.md`, relevant specs, ADRs, history, and nearby tests before forming conclusions.
 
-## Protect evidence and secrets
+## Protect evidence
 
-Redact credentials, tokens, cookies, authorization headers, and personal data before showing commands, outputs, or captured artifacts. Keep credentials in environment variables. If redaction removes evidence needed to continue, explain what is missing and ask the user for a safe substitute.
+Redact credentials, tokens, cookies, authorization headers, personal data, and sensitive payloads. Keep credentials in configured stores. Request the smallest safe substitute when redaction removes required evidence.
 
-## 1. Build a feedback loop
+## Build the feedback loop
 
-Read [references/feedback-loops.md](references/feedback-loops.md) and choose the smallest loop that exercises the reported symptom. A human-in-the-loop flow is a last resort; adapt `scripts/hitl-loop.template.sh` when unavoidable.
+Reuse an established exact loop only after confirming it still matches the pinned revision and environment and remains repeatable, safe, and authorized. Otherwise, or for a flake, human step, or substitute reproduction, read [references/feedback-loops.md](references/feedback-loops.md) and choose the smallest safe loop. Adapt [scripts/hitl-loop.template.sh](scripts/hitl-loop.template.sh) only when a human step is unavoidable. For a performance regression or unknown bottleneck with a known workload and objective, read [references/performance.md](references/performance.md) instead.
 
-Record one command that you have run and whose redacted output demonstrates the signal. The loop should be:
+Record the loop's command or workload and redacted signal. Require it to be red-capable, repeatable, fast enough for experiments, and agent-runnable except for an explicit human step. For flakes, record sample count and reproduction rate. Treat static analysis as provisional when no safe loop exists.
 
-- **red-capable**: asserts the user's exact symptom;
-- **repeatable**: deterministic, or a measured high reproduction rate for a flaky bug;
-- **fast enough** for repeated hypothesis tests;
-- **agent-runnable**, except for an explicitly structured human step.
+Build an observation-hypothesis-experiment evidence graph. Give each experiment a context capsule containing the symptom, pinned revision and environment, reproduction, redacted signal, one variable, side-effect class, budget, and stop condition. Independent read-only evidence may be collected in parallel, but shared-environment mutations, production observability, timing-sensitive work, and causal experiments remain serial. One investigator owns hypothesis ranking and causal conclusions.
 
-If a safe loop cannot be built, report what was tried and request the minimum missing access or artifact. Do not label an untested theory as a verified cause.
+## Reproduce and test hypotheses
 
-## 2. Reproduce and minimize
+1. Confirm the observation matches the report; minimize inputs, steps, configuration, and dependencies one at a time.
+2. Generate three to five ranked hypotheses and name an observation or perturbation that would support or reject each.
+3. Test one variable at a time. Prefer debugger, REPL, profile, trace, or query-plan evidence before narrow instrumentation.
+4. Reject contradicted hypotheses and update the ranking.
+5. Verify that the leading cause predicts the result, then rerun the original unminimized scenario.
 
-Confirm the observed failure matches the user's report. Remove inputs, steps, configuration, and dependencies one at a time, rerunning the loop after each change. Stop when every remaining element is load-bearing.
+Never log indiscriminately or expose secrets. Obtain approval before changing production observability. After each experiment, checkpoint new evidence and re-rank the graph. If two consecutive rounds add no new evidence or repeat the same action or error pattern, stop and redesign the loop or request the smallest missing input; a budget stop is not a diagnosis.
 
-## 3. Form hypotheses
+## Locate measured bottlenecks
 
-Generate three to five ranked, falsifiable hypotheses. For each, state the observation or perturbation that would support or reject it. Show the list to the user, but continue with the best evidence-based ranking unless a decision is required.
+When the workload and objective are known, establish a comparable distribution and profile the limiting resource. Use controlled perturbations only to prove causality, not to turn diagnosis into open-ended optimization.
 
-## 4. Test one variable at a time
+Run repeated or worst-case workloads in a controlled local or test environment. Require separate approval, bounded load, and stop conditions before production profiling, load, or side effects. Treat changes within noise and correctness, security, durability, or resource trade-offs as limits on the conclusion.
 
-Prefer debugger or REPL inspection, then narrowly targeted instrumentation. Tag temporary logs with a unique prefix for cleanup. Never log secrets or “log everything and grep.”
+## Repair and report
 
-For performance regressions, establish a repeatable timing, profile, or query-plan baseline before changing code.
+If repair is explicitly in scope, use `$tdd` at the verified public seam. If no honest seam exists, use `$codebase-design`. Treat caches, batching, concurrency, retries, and approximations as semantic changes unless their behavior is specified.
 
-## 5. Establish the cause
-
-Verify that the leading hypothesis predicts the observed behavior and that a controlled perturbation changes the loop in the predicted direction. Re-run the original, unminimized scenario to ensure the explanation covers the real report.
-
-Report:
-
-- the exact symptom and reproduction command;
-- the minimized case;
-- the verified root cause and causal evidence;
-- remaining uncertainty;
-- the smallest recommended fix and regression seam.
-
-Stop here unless the user explicitly requested a fix.
-
-## 6. Fix only when authorized
-
-When repair is explicitly in scope, use $tdd at the verified seam: turn the minimized case into a failing regression test, apply the smallest fix, and re-run both the regression test and original loop. If no correct seam exists, report that architecture finding rather than adding a misleading test.
-
-Remove only instrumentation and temporary artifacts created during this diagnosis and confirmed disposable. Never delete user-owned artifacts or unrelated changes. If the missing seam is the durable cause, recommend $review-codebase-architecture after the immediate work.
+Report the reproduction or workload, environment, baseline, causal or profile evidence, experiments, checks, result distribution when applicable, remaining uncertainty, and residual risk. A known optimization can proceed through normal implementation or `$tdd` when its behavior should be locked down. Remove only confirmed-disposable temporary artifacts created during this work.

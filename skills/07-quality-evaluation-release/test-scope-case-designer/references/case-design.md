@@ -38,7 +38,7 @@
 - 同一失败模式的变体保留来源标签和数据行，不复制步骤。
 - 权限、外部副作用、恢复动作或判定方式不同时拆成独立用例。
 
-每个参数行保留 `data_id`、来源、期望、风险和版本。`representative_cases` 只交付骨架与代表行；`baseline_ready` 才展开完整字段。
+每个参数行保留 `data_id`、来源、期望、风险和版本。`representative_cases` 只交付骨架与代表行；`baseline_ready` 才展开完整字段。对 Agent，`baseline_ready` 的产物名为 `agent_case_baseline`：它拥有场景、风险、输入意图、判据和批准的采样要求，但不拥有可执行 `dataset_manifest`、runner 实现或 Judge 工具绑定。
 
 ## Agent 补充字段
 
@@ -73,13 +73,14 @@ handoff_packet:
   project_version: null
   snapshot_id: null
   scope_status: DRAFT | REVIEW_REQUIRED | APPROVED | BLOCKED
+  agent_case_baseline_ref: null
   artifact_refs: []
   blocking_gaps: []
   approved_exclusions: []
   invalidation_triggers: []
 ```
 
-`snapshot_id` 绑定变更、风险、判据、用例/数据版本和查询时间。`APPROVED` 必须引用真实评审证据。
+`snapshot_id` 绑定变更、风险、判据、用例规范版本和查询时间。`APPROVED` 必须引用真实评审证据。`$agent-nondeterministic-evaluator` 可把批准基线物化为版本化数据集，但不得改变场景意图或 Oracle；runner 和 Judge 产品、版本、权限与凭据由 `$test-execution-governor` 的 `tool_selection` 模式选择或审计。
 
 ## 评审与维护
 

@@ -1,61 +1,59 @@
 ---
 name: review-code-against-spec
-description: Review a branch, PR, or working diff against repository standards and an originating spec as two independent axes. Use when the user asks whether changes since a fixed point are compliant and complete; not for architecture discovery, bug diagnosis, or implementing fixes.
+description: Review a branch, PR, commit range, or working diff against repository standards and an originating spec as independent axes. Use to assess a fixed change set; report findings without edits unless fixes are separately requested.
 ---
 
 # Review Code Against Spec
 
-Review the same diff independently for **Standards** and **Spec**. Report findings; do not modify the code unless the user separately requests fixes.
+Review one pinned change set independently for **Standards** and **Spec**. Findings must be introduced by the reviewed changes and supported by actionable evidence.
 
-## 1. Pin the comparison
+## Pin the change set
 
-Use the commit, branch, tag, or merge-base supplied by the user. If omitted, infer the repository's default branch when unambiguous and state the assumption; ask only when different choices would materially change the diff.
+Honor a user-supplied base, range, PR, or commit. Otherwise infer only when unambiguous and state the assumption.
 
-Resolve the fixed point before review, then capture:
+- **Branch or PR**: compare from the merge base to the review head, such as `git diff <base>...HEAD`.
+- **Commit or explicit range**: review exactly that commit or range.
+- **Working tree**: use `git diff HEAD --` for tracked staged and unstaged changes, inspect `git status --short`, and include every relevant untracked file explicitly.
 
-- `git diff <fixed-point>...HEAD` for the merge-base diff;
-- `git log <fixed-point>..HEAD --oneline` for commit context;
-- the changed-file list.
+Capture the endpoints, commit context when applicable, changed-file list, and raw patch. Stop clearly if the reference is invalid or the change set is empty. Ask only when competing bases materially change the review.
 
-Stop with a clear explanation if the ref is invalid or the diff is empty.
+Build a requirements-files-checks coverage map over the pinned change set. For a large review, run Standards and Spec as independent read-only workers only in the same current frontier when saved critical-path time exceeds dispatch, rereading, and fan-in cost; give both the same capsule of endpoints, raw diff, governing sources, and exclusions. At fan-in, a single report writer verifies the input is unchanged, resolves conflicting evidence from primary sources, deduplicates findings, and fills coverage gaps. A changed diff invalidates worker conclusions.
 
-## 2. Find the spec
+Use a risk-first review pass and iteration budget: inspect high-impact requirements, trust boundaries, shared state, and cross-file behavior before low-risk areas. Expand only when new evidence or a material coverage gap justifies the cost. A budget stop is not a clean review; report every unreviewed area as a residual verification gap.
 
-Search in this order:
+## Find governing sources
 
-1. issue or PR references in commit messages;
-2. a path or tracker item supplied by the user;
-3. matching files under `docs/`, `specs/`, or `.scratch/`;
-4. nearby acceptance criteria or approved tickets.
+Find the spec in this order:
 
-Use configured tracker access when available. If no authoritative spec exists, run only the Standards axis and label the Spec axis `No spec available`.
+1. a path, issue, PR, or acceptance criteria supplied by the user;
+2. references in reviewed commits or branch context;
+3. matching files under conventional documentation or spec directories;
+4. nearby approved tickets or behavior tests.
 
-## 3. Find standards
+If no authoritative spec exists, run only the Standards axis and label the Spec axis `No spec available`.
 
-Collect repository instructions such as `AGENTS.md`, `CONTRIBUTING.md`, coding standards, and relevant local guidance. Read [references/code-smells.md](references/code-smells.md) for the fallback smell baseline.
+Collect root and nested `AGENTS.md`, contribution guides, coding standards, and tool configuration. Repository rules override the fallback [code-smell baseline](references/code-smells.md). Treat fallback smells as judgment calls, not hard violations.
 
-Repository rules override the baseline. Treat baseline smells as judgement calls, not hard violations, and skip checks already enforced by tooling unless the diff bypasses that tooling.
+## Review independently
 
-## 4. Run independent reviews
+Perform two separate passes over the same raw change set so one conclusion does not anchor the other.
 
-Run two clearly separated passes so one conclusion does not anchor the other. Give each pass the raw diff, commit list, changed files, and only its axis-specific sources.
+### Standards pass
 
-**Standards pass**
+- Find correctness, security, data-loss, concurrency, compatibility, maintainability, and documented-rule problems introduced by the change.
+- Cite the governing rule when one exists; otherwise explain the concrete cost of a heuristic concern.
+- Ignore unrelated pre-existing problems and suppress style nits already enforced by tooling.
 
-- Cite each documented rule violation with source and changed file/hunk.
-- Name any baseline smell and quote the relevant changed code.
-- Distinguish hard repository-rule breaches from heuristic concerns.
-- Ignore unrelated pre-existing code outside the diff.
+### Spec pass
 
-**Spec pass**
+- Find missing or partial requirements, incorrect implemented behavior, and unrequested scope.
+- Cite the exact requirement, acceptance criterion, or approved behavior for every finding.
+- Do not reinterpret an ambiguous spec as a definite defect; surface the ambiguity separately.
 
-- Identify missing or partial requirements.
-- Identify unrequested behavior or scope creep.
-- Identify implemented requirements whose behavior appears incorrect.
-- Cite the governing spec or acceptance criterion for every finding.
+Iterate only to gather missing evidence or close coverage-map gaps. Do not let review workers modify code, vote findings into correctness, or fragment work so narrowly that cross-file behavior is lost.
 
-## 5. Report without cross-axis reranking
+## Report findings first
 
-Present `## Standards` and `## Spec` separately. For each finding include severity, file and line or hunk, evidence, and the smallest actionable correction. State explicitly when an axis has no findings or no source.
+Keep `## Standards` and `## Spec` separate. For each actionable finding include severity, a tight file, line, or hunk location, evidence, impact, and the smallest correction. State explicitly when an axis has no findings or no source.
 
-End with the finding count and highest severity within each axis. Do not choose one overall winner or let one axis mask the other.
+End with finding count and highest severity per axis plus residual verification gaps. Do not merge the axes into one score, and do not modify code unless the user separately requests fixes.

@@ -6,11 +6,11 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $skillsRoot = Join-Path $repoRoot 'skills'
 $errors = [System.Collections.Generic.List[string]]::new()
 
-$expectedScenarioCount = 8
-$expectedSkillCount = 25
+$expectedScenarioCount = 7
+$expectedSkillCount = 16
 $maxSkillLines = 100
-$maxTotalSkillLines = 900
-$maxTotalSkillChars = 50000
+$maxTotalSkillLines = 800
+$maxTotalSkillChars = 52000
 $qualityGroupName = '07-quality-evaluation-release'
 $maxQualitySkillLines = 225
 $maxQualityResourceLines = 1800
@@ -23,13 +23,96 @@ $retiredSkillNames = @(
     'setup-matt-pocock-skills',
     'grill-me',
     'grill-with-docs',
+    'grilling',
     'implement',
     'improve-codebase-architecture',
     'code-review',
+    'handoff',
+    'prototype',
+    'review-codebase-architecture',
+    'release-regression-gatekeeper',
+    'research',
+    'route-engineering-work',
+    'run-learning-workspace',
     'teach',
+    'test-process-governor',
+    'test-tool-governor',
+    'to-questionnaire',
+    'to-spec',
+    'to-tickets',
+    'wayfinder',
     'wait-what',
+    'wizard',
     'writing-for-agents'
 )
+$efficiencyContracts = @{
+    'elicit-stakeholder-input' = @(
+        @{ Label = 'exclusive live/async modes'; Patterns = @('(?i)choose exactly one mode', '(?i)live', '(?i)async') },
+        @{ Label = 'evidence-first boundary'; Patterns = @('(?i)discoverable facts', '(?i)available evidence') },
+        @{ Label = 'mode transition stop'; Patterns = @('(?i)do not silently switch modes', '(?i)stop and propose an async questionnaire') },
+        @{ Label = 'no implicit implementation'; Patterns = @('(?i)do not begin implementation') }
+    )
+    'plan-engineering-work' = @(
+        @{ Label = 'exclusive map/spec/slice modes'; Patterns = @('(?i)select one mode', '(?i)map', '(?i)spec', '(?i)slice') },
+        @{ Label = 'configured tracker gate'; Patterns = @('(?i)tracker conventions are missing', '(?i)configure-engineering-skills') },
+        @{ Label = 'no automatic lifecycle advance'; Patterns = @('(?i)exactly one mode per invocation', '(?i)never advance automatically') }
+    )
+    'codebase-design' = @(
+        @{ Label = 'dependency and trust-boundary graph'; Patterns = @('(?i)dependency and trust-boundary graph') },
+        @{ Label = 'independent alternatives and one integrator'; Patterns = @('(?i)independent subagents', '(?i)one integrator', '(?i)do not use majority vote') },
+        @{ Label = 'constraint checkpoint'; Patterns = @('(?i)constraint checkpoint', '(?i)pinned repository input') }
+    )
+    'tdd' = @(
+        @{ Label = 'behavior-slice graph'; Patterns = @('(?i)behavior-slice graph') },
+        @{ Label = 'safe independent red fan-out'; Patterns = @('(?i)independent red', '(?i)disjoint write sets') },
+        @{ Label = 'single seam owner and fan-in gate'; Patterns = @('(?i)one writer for the same public seam', '(?i)at fan-in', '(?i)green checkpoint') },
+        @{ Label = 'red-state integrity'; Patterns = @('(?i)do not enter green without the intended red') }
+    )
+    'refactoring-safely' = @(
+        @{ Label = 'impact graph and migration waves'; Patterns = @('(?i)impact graph', '(?i)migration wave') },
+        @{ Label = 'single writer and serial global proof'; Patterns = @('(?i)a single writer', '(?i)global preservation proof.{0,80}remain serial') },
+        @{ Label = 'preservation checkpoint invalidation'; Patterns = @('(?i)preservation checkpoint', '(?i)stop the current wave immediately', '(?i)revalidate affected work') }
+    )
+    'evolving-contracts' = @(
+        @{ Label = 'dependency graph and compatibility matrix'; Patterns = @('(?i)producer-reader-storage-deployment dependency graph', '(?i)pinned compatibility matrix') },
+        @{ Label = 'phase gates and serial authority'; Patterns = @('(?i)explicit phase gates', '(?i)authoritative writes.{0,120}remain serial') },
+        @{ Label = 'checkpoint resume safety'; Patterns = @('(?i)durable batch cursor', '(?i)before resume, revalidate every field', '(?i)do not replay writes') }
+    )
+    'diagnosing-bugs' = @(
+        @{ Label = 'evidence graph and context capsule'; Patterns = @('(?i)observation-hypothesis-experiment evidence graph', '(?i)context capsule') },
+        @{ Label = 'parallel reads and serial experiments'; Patterns = @('(?i)independent read-only evidence.{0,80}parallel', '(?i)causal experiments remain serial') },
+        @{ Label = 'bounded no-progress stop'; Patterns = @('(?i)two consecutive rounds add no new evidence', '(?i)budget stop is not a diagnosis') }
+    )
+    'review-code-against-spec' = @(
+        @{ Label = 'coverage map'; Patterns = @('(?i)requirements-files-checks coverage map') },
+        @{ Label = 'pinned dual-axis workers'; Patterns = @('(?i)Standards and Spec as independent read-only workers', '(?i)pinned change set') },
+        @{ Label = 'single report fan-in'; Patterns = @('(?i)at fan-in', '(?i)single report writer') },
+        @{ Label = 'risk-first bounded review'; Patterns = @('(?i)risk-first review pass', '(?i)residual verification gap') }
+    )
+    'resolving-merge-conflicts' = @(
+        @{ Label = 'conflict dependency graph'; Patterns = @('(?i)conflict dependency graph') },
+        @{ Label = 'read-only pinned analysis'; Patterns = @('(?i)analyze independent conflicts read-only', '(?i)pinned Git state') },
+        @{ Label = 'single resolver and invalidation'; Patterns = @('(?i)a single resolver', '(?i)Git-state change invalidates') },
+        @{ Label = 'ambiguous semantics stop'; Patterns = @('(?i)cannot uniquely determine the semantics', '(?i)request the minimum user decision') }
+    )
+}
+
+function Test-RequiredPatterns {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Text,
+
+        [Parameter(Mandatory)]
+        [string[]]$Patterns
+    )
+
+    foreach ($pattern in $Patterns) {
+        if ($Text -notmatch $pattern) {
+            return $false
+        }
+    }
+    return $true
+}
 
 function Test-MarkdownLinks {
     param(
@@ -151,6 +234,14 @@ foreach ($directory in $skillDirectories) {
 
     if ($skillLines.Count -gt $maxSkillLines) {
         $errors.Add("${relativeSkill}: SKILL.md has $($skillLines.Count) lines; maximum is $maxSkillLines")
+    }
+
+    if ($efficiencyContracts.ContainsKey($directory.Name)) {
+        foreach ($rule in $efficiencyContracts[$directory.Name]) {
+            if (-not (Test-RequiredPatterns -Text $content -Patterns $rule.Patterns)) {
+                $errors.Add("${relativeSkill}: efficiency contract missing: $($rule.Label)")
+            }
+        }
     }
 
     foreach ($resourceDirectoryName in @('references', 'assets', 'scripts')) {
@@ -330,6 +421,29 @@ foreach ($instructionFile in @(
     }
 }
 
+# Guard active repository guidance as well as skill-local instructions. Historical
+# migration records intentionally retain old names, but current entry points must
+# never advertise retired invocations.
+$activeGuidanceFiles = @(
+    (Join-Path $repoRoot 'README.md'),
+    (Join-Path $repoRoot 'CONTRIBUTING.md'),
+    (Join-Path $repoRoot 'docs\skills-distribution.md'),
+    (Join-Path $repoRoot 'docs\development-orchestration-efficiency-spec.md')
+)
+foreach ($guidancePath in $activeGuidanceFiles) {
+    if (-not (Test-Path -LiteralPath $guidancePath -PathType Leaf)) {
+        continue
+    }
+    $guidanceContent = Get-Content -LiteralPath $guidancePath -Raw -Encoding UTF8
+    $relativeGuidance = $guidancePath.Substring($repoRoot.Length + 1)
+    foreach ($retiredName in $retiredSkillNames) {
+        $pattern = '(?<![a-z0-9-])(?:\$|/)' + [regex]::Escape($retiredName) + '(?![a-z0-9-])'
+        if ($guidanceContent -match $pattern) {
+            $errors.Add("${relativeGuidance}: references retired skill '$retiredName'")
+        }
+    }
+}
+
 if ($totalSkillLines -gt $maxTotalSkillLines) {
     $errors.Add("skills/: SKILL.md total is $totalSkillLines lines; maximum is $maxTotalSkillLines")
 }
@@ -373,6 +487,26 @@ if ($qualitySkillLines -gt $maxQualitySkillLines) {
 
 if ($qualityResourceLines -gt $maxQualityResourceLines) {
     $errors.Add("${qualityGroupName}: text resources total $qualityResourceLines lines; maximum is $maxQualityResourceLines")
+}
+
+$efficiencySpecPath = Join-Path $repoRoot 'docs\development-orchestration-efficiency-spec.md'
+$readmePath = Join-Path $repoRoot 'README.md'
+if (-not (Test-Path -LiteralPath $efficiencySpecPath -PathType Leaf)) {
+    $errors.Add('docs/: missing development-orchestration-efficiency-spec.md')
+}
+if (-not (Test-Path -LiteralPath $readmePath -PathType Leaf)) {
+    $errors.Add('repository: missing README.md')
+}
+else {
+    $readmeContent = Get-Content -LiteralPath $readmePath -Raw -Encoding UTF8
+    if ($readmeContent -notmatch '\(docs/development-orchestration-efficiency-spec\.md\)') {
+        $errors.Add('README.md: missing development orchestration efficiency spec link')
+    }
+    foreach ($term in @('graph', 'evidence loop', 'subagent', 'single-writer')) {
+        if ($readmeContent -notmatch [regex]::Escape($term)) {
+            $errors.Add("README.md: missing orchestration guidance '$term'")
+        }
+    }
 }
 
 if ($errors.Count -gt 0) {

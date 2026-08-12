@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codebase Architecture and Design"
+  short_description: "Scan architecture or design one selected module"
+  default_prompt: "Use $codebase-design in scan or design mode for this architecture request."

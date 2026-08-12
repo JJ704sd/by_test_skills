@@ -1,4 +1,4 @@
 interface:
-  display_name: "Resolving Merge Conflicts"
-  short_description: "Resolve merge and rebase conflicts safely"
-  default_prompt: "Use $resolving-merge-conflicts to resolve the current merge or rebase conflicts safely."
+  display_name: "Resolve Merge Conflicts"
+  short_description: "Resolve conflicts without losing either intent"
+  default_prompt: "Use $resolving-merge-conflicts to resolve the current Git conflicts and validate both sides' intent."

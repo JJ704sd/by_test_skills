@@ -4,6 +4,8 @@
 日期：2026-08-11
 范围：`skills/`、`docs/`、`README.md`、`CONTRIBUTING.md`、`scripts/Test-Skills.ps1`
 
+> 本文是 25-skill 阶段的历史实施记录。后续全量边界审计继续删除默认能力和主题外入口，并把相邻生命周期收敛为显式模式；当前为 16 个按场景安装的 skills。当前状态见 [开发场景编排提效规范](development-orchestration-efficiency-spec.md) 和 [Skills 分布与职责边界](skills-distribution.md)。
+
 ## 1. 背景与基线
 
 上一轮已完成技能去重、重命名、资源分层和元数据规范化，将技能数从 30 个降至 25 个。本轮不再做目录级大迁移，而是针对仍然偏重、重复或耦合运行时编排的内容继续精简。

@@ -1,4 +1,0 @@
-interface:
-  display_name: "测试工具选型与治理"
-  short_description: "选择并治理测试工具、隔离环境、权限、凭据与资产生命周期"
-  default_prompt: "使用 $test-tool-governor 审核现有测试工具或形成安全、可维护的选型决策。"

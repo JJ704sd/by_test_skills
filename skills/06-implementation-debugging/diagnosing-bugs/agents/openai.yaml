@@ -1,4 +1,4 @@
 interface:
   display_name: "Diagnosing Bugs"
-  short_description: "Find verified causes of hard bugs"
-  default_prompt: "Use $diagnosing-bugs to reproduce this failure and verify its root cause."
+  short_description: "Verify causes of failures and bottlenecks"
+  default_prompt: "Use $diagnosing-bugs to reproduce this failure or bottleneck and verify its cause."

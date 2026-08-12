@@ -34,7 +34,7 @@
 9. 仅显式调用的技能在 `agents/openai.yaml` 使用 `policy.allow_implicit_invocation: false`；不要在 `SKILL.md` 使用 `disable-model-invocation` 或 `argument-hint`。
 10. 技能之间的调用统一写成 `$skill-name`。
 
-仓库预算由校验器执行：全部 `SKILL.md` 不超过 900 行 / 50,000 字符；07 质量组 `SKILL.md` 不超过 225 行，文本资源不超过 1,800 行。新增内容应先证明它属于每次必读正文还是按需资源，而不是通过放宽预算解决。
+仓库预算由校验器执行：全部 `SKILL.md` 不超过 800 行 / 52,000 字符；07 质量组 `SKILL.md` 不超过 225 行，文本资源不超过 1,800 行。新增内容应先证明它属于每次必读正文还是按需资源；调整 skill 数量或职责时再以实测基线同步预算，不能用放宽预算掩盖冗余。校验器可以验证现有 skill 的契约，但不得把可选 skill 硬编码为不可删除的“核心”。
 
 ## 安全边界
 

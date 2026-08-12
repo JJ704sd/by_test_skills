@@ -1,0 +1,4 @@
+interface:
+  display_name: "测试执行治理"
+  short_description: "安全治理测试工具、环境、权限、执行证据与生命周期门禁"
+  default_prompt: "使用 $test-execution-governor 选择测试执行模式，并给出独立的授权、门禁与交接结论。"

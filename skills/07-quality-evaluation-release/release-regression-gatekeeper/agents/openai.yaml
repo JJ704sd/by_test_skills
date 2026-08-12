@@ -1,4 +1,0 @@
-interface:
-  display_name: "版本回归与发布门禁"
-  short_description: "决定回归层级、发布、灰度、停止、回滚、恢复与发布关闭"
-  default_prompt: "使用 $release-regression-gatekeeper 审核发布证据并给出当前发布或回滚决策。"

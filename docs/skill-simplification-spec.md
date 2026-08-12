@@ -4,6 +4,8 @@
 日期：2026-08-10
 范围：`skills/`、`README.md`、`CONTRIBUTING.md`、`docs/skills-distribution.md`、`scripts/Test-Skills.ps1`
 
+> 本文是 30→25 skills 第一轮迁移的历史实施记录，不代表当前目录。当前数量、安装组合与职责边界以 [Skills 分布与职责边界](skills-distribution.md) 为准。
+
 ## 1. 背景
 
 仓库当前包含 30 个技能，已按 8 个使用场景分组，但仍保留了早期技能格式、别名包装和重复说明。结构校验可以通过，不代表触发边界、上下文成本和副作用边界已经合理。

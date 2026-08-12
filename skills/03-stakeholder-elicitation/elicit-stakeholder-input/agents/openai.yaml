@@ -1,0 +1,4 @@
+interface:
+  display_name: "Elicit Stakeholder Input"
+  short_description: "Interview a user or draft an async questionnaire"
+  default_prompt: "Use $elicit-stakeholder-input to resolve this missing human input in live or async mode."

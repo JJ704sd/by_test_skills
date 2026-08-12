@@ -1,0 +1,39 @@
+---
+name: evolving-contracts
+description: Safely evolve APIs, schemas, persisted data, dependencies, runtimes, or toolchains through explicit compatibility transitions. Use when change cannot be atomic, old and new states must coexist, or recovery risks matter; not for internal refactors, atomic upgrades, or undecided contracts.
+---
+
+# Evolving Contracts and Dependencies
+
+Move a live contract or external dependency from one valid state to another without assuming every consumer, record, or environment changes atomically.
+
+## Define the change
+
+1. Read repository instructions, governing contracts, manifests, lockfiles, deployment topology, supported versions, ownership, and rollback expectations.
+2. Inventory readers, writers, validators, persisted forms, generated clients, manifests, workspace overrides, runtime constraints, CI or container versions, and repository-used dependency APIs as applicable.
+3. Build a producer-reader-storage-deployment dependency graph and a pinned compatibility matrix. Use them to identify phase gates, ownership, recovery paths, and safe batches.
+4. State current and target forms or resolved versions, compatibility window, invariants, supported matrix, irreversible operations, and unrelated changes that are out of scope.
+5. Use `$codebase-design` first when the target public contract remains unresolved. Use `$refactoring-safely` when no mixed-version or external compatibility boundary exists.
+
+## Select evidence and transition
+
+For API, schema, data, event, or configuration changes, read [references/transition-patterns.md](references/transition-patterns.md) and default to:
+
+1. **Expand readers:** deploy readers that accept old and new forms without requiring or emitting the new form.
+2. **Migrate writers:** only after supported readers are proven compatible, emit the new form and migrate or backfill in bounded, idempotent, resumable batches. Use a versioned contract or adapter when old readers reject it.
+3. **Observe:** measure interoperability, migration failures, data reconciliation, and remaining legacy use.
+4. **Contract:** remove the old form only after evidence proves no required reader, writer, or record depends on it.
+
+For dependency, framework, runtime, or toolchain changes, read [references/dependency-upgrades.md](references/dependency-upgrades.md). Use exact-version official guidance, establish a frozen baseline, upgrade one dependency family or compatibility line at a time, and inspect the final resolved graph and lockfile churn.
+
+Do not choose “latest” reflexively, rely on rollout order as compatibility proof, or assume application rollback reverses destructive data changes.
+
+Treat expand, migrate, observe, and contract as explicit phase gates and safe checkpoints. Parallelize same-matrix read checks or authorized write batches only within one unlocked current frontier when saved critical-path time exceeds dispatch, rereading, and fan-in cost; writes must be disjoint and bounded, idempotent, and resumable. Authoritative writes, contraction, recovery decisions, shared data, and Git state remain serial under one owner. Before an irreversible or production action, stop with an approval capsule naming evidence, impact, recovery, budget, and next action.
+
+At each checkpoint record repository revision and compatibility-matrix version, completed phase, durable batch cursor, validation results, unfinished side effects, and next gate. Before resume, revalidate every field against current state. If they differ or the cursor is ambiguous, do not replay writes; return to the last verified safe boundary and choose an authorized recovery path.
+
+## Verify every state
+
+Test initial, intermediate mixed-version, and final states plus retries, partial failure, supported runtimes, packaging, integrations, and rollback or forward recovery as applicable. Keep destructive steps separately authorized and backed by a tested recovery mechanism.
+
+Use `$tdd` for settled behavior slices. Use `$diagnosing-bugs` for unclear migration or upgrade failures. Report the compatibility matrix, authoritative evidence, sequence, manifest or data changes, recovery path, checks, contraction condition, and residual risk.

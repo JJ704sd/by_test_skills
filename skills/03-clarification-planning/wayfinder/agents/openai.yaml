@@ -1,6 +1,0 @@
-interface:
-  display_name: "Wayfinder"
-  short_description: "Map unknown routes as decision tickets"
-  default_prompt: "Use $wayfinder to chart this multi-session effort as a map of decision tickets."
-policy:
-  allow_implicit_invocation: false

@@ -1,6 +1,0 @@
-interface:
-  display_name: "Review Codebase Architecture"
-  short_description: "Rank codebase architecture improvements"
-  default_prompt: "Use $review-codebase-architecture to scan this codebase and rank deepening opportunities."
-policy:
-  allow_implicit_invocation: false

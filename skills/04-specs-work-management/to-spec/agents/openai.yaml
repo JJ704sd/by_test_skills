@@ -1,6 +1,0 @@
-interface:
-  display_name: "To Spec"
-  short_description: "Synthesize settled work into a specification"
-  default_prompt: "Use $to-spec to turn our settled discussion into a durable project specification."
-policy:
-  allow_implicit_invocation: false

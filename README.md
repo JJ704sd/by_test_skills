@@ -3,118 +3,96 @@
 > 面向软件工程、质量保障与 Agent 评测的可复用 Codex Skills 集合。
 
 [![Validate skills](https://github.com/JJ704sd/by_test_skills/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/JJ704sd/by_test_skills/actions/workflows/validate-skills.yml)
-[![Skills](https://img.shields.io/badge/skills-25-2563eb)](skills)
-[![Scenarios](https://img.shields.io/badge/scenarios-8-0f766e)](docs/skills-distribution.md)
+[![Skills](https://img.shields.io/badge/skills-16-2563eb)](skills)
+[![Scenarios](https://img.shields.io/badge/scenarios-7-0f766e)](docs/skills-distribution.md)
 [![License](https://img.shields.io/badge/license-MIT-16a34a)](LICENSE)
 
-仓库包含 **25 个可独立安装的技能**，覆盖从调研、澄清和规格设计，到实现、诊断、测试治理、Agent 评测和发布门禁的完整工程路径。每个技能都有清晰的触发边界，只加载当前任务需要的流程与参考资料。
+仓库包含 **16 个按场景安装的 skills**，覆盖人员输入、持久化规划、代码库设计、实现安全、测试治理、Agent 评测和生产发布。每个入口必须提供独立意图、专门流程、可复用资源或独立授权边界；普通路由、公开调研、交接、一次性原型、学习辅导和人工步骤清单继续使用 Codex 默认能力。
 
-## 设计特点
+## 设计原则
 
-- **最小入口**：`SKILL.md` 只保留每次调用都需要的流程、决策权和硬约束。
-- **按需展开**：详细方法放在 `references/`，输出模板放在 `assets/`，确定性帮助程序放在 `scripts/`。
-- **职责分离**：范围、工具、测试准出、Agent 质量和生产发布由不同技能负责，避免越权。
-- **可独立安装**：复制完整技能目录即可使用，不依赖场景目录中的共享运行时文件。
-- **持续校验**：仓库自动检查元数据、资源路由、链接、上下文预算和已退休技能引用。
+- **按状态选模式**：相邻生命周期合并为一个入口，但一次请求只进入一个明确模式。
+- **按需展开**：核心路由与硬约束留在 `SKILL.md`，分支方法放在 `references/`，模板放在 `assets/`。
+- **授权隔离**：范围、执行、Agent 质量和生产流量分别由不同 owner 决策。
+- **资源自包含**：复制完整 skill 目录即可获得其资源；未安装的可选后继回退到 Codex 普通能力。
+- **受控编排**：适用技能使用 task-local graph、evidence loop、checkpoint、有限 subagent fan-out 和 single-writer fan-in。
 
 ## 快速开始
 
-1. 克隆仓库：
+```bash
+git clone https://github.com/JJ704sd/by_test_skills.git
+```
 
-   ```bash
-   git clone https://github.com/JJ704sd/by_test_skills.git
-   ```
+选择需要的完整 `<skill-name>/` 目录复制到 Codex Skills 目录，不要只复制 `SKILL.md`。然后显式调用，例如：
 
-2. 选择一个技能，将完整的 `<skill-name>/` 目录复制到运行时配置的 Skills 目录。不要只复制 `SKILL.md`。
-3. 使用 `$skill-name` 显式调用，例如：
+```text
+使用 $diagnosing-bugs 复现这个偶发失败并确认根因。
+```
 
-   ```text
-   使用 $diagnosing-bugs 复现这个偶发失败并确认根因。
-   ```
+不要默认全量安装：
 
-涉及 issue tracker、triage 标签或领域文档约定的工作流，先运行 `$configure-engineering-skills`。普通实现不需要额外的 `implement` 包装技能；只有明确要求 test-first 时才使用 `$tdd`。
+- **Tracker 工作流**：`configure-engineering-skills`、`domain-modeling`、`elicit-stakeholder-input`、`plan-engineering-work`、`triage`。
+- **设计与实现**：`codebase-design` 加上任务所需的诊断、TDD、重构、契约迁移、冲突处理或代码审查 skill。
+- **质量与发布**：`test-scope-case-designer`、`test-execution-governor`、`release-gatekeeper`；Agent 系统再加 `agent-nondeterministic-evaluator`。
 
-## 按任务选择技能
+涉及 tracker、triage 标签或领域文档约定时，先运行 `$configure-engineering-skills`。普通实现不需要 `implement` 包装；只有明确要求 test-first 时才使用 `$tdd`。
+
+## 按任务选择
 
 | 当前需要 | 使用 |
 | --- | --- |
-| 不确定从哪里开始或该交给哪个工作流 | `$route-engineering-work` |
-| 调查可由文档、规范、源码或一方 API 证明的事实 | `$research` |
-| 与当前用户逐轮压力测试尚未定案的计划或决策 | `$grilling` |
-| 向另一位知识持有人异步收集私有背景 | `$to-questionnaire` |
-| 为路线未知的跨会话工作建立决策地图 | `$wayfinder` |
-| 将已解决的讨论固化为规格，再拆成实现切片 | `$to-spec` → `$to-tickets` |
+| 与当前用户实时澄清判断，或为另一知识持有人生成异步问卷 | `$elicit-stakeholder-input` 的 `live` / `async` 模式 |
+| 为未知路线建决策图、发布父规格或拆实现切片 | `$plan-engineering-work` 的 `map` / `spec` / `slice` 模式 |
 | 分类和验证外部流入的 issue 或 PR | `$triage` |
-| 扫描全仓架构候选，或设计已选模块的接口与 seam | `$review-codebase-architecture` → `$codebase-design` |
-| 用一次性逻辑或 UI 工件回答一个设计问题 | `$prototype` |
+| 扫描广域架构候选，或设计已选模块的接口与 seam | `$codebase-design` 的 `scan` / `design` 模式 |
 | 诊断根因未知、难复现、flaky 或性能回归问题 | `$diagnosing-bugs` |
 | 用 red-green-refactor 实现已知行为或已验证修复 | `$tdd` |
-| 按仓库规范和原始 spec 双轴审查 diff | `$review-code-against-spec` |
+| 保持调用者可见行为不变地完成非平凡重构 | `$refactoring-safely` |
+| 让新旧 API、schema、数据、依赖或运行时安全共存并迁移 | `$evolving-contracts` |
+| 按仓库标准和原始 spec 双轴审查固定 diff | `$review-code-against-spec` |
 | 解决正在进行的 merge 或 rebase 冲突 | `$resolving-merge-conflicts` |
-| 为人工配置生成向导，或把工作交接给新上下文 | `$wizard` / `$handoff` |
 
-完整的技能职责和相邻边界见 [Skills 分布文档](docs/skills-distribution.md)。
+## 质量与发布决策权
 
-## 质量、评测与发布链路
-
-五个质量技能保留独立决策权：
-
-| 问题 | 负责技能 |
+| 决策 | Owner |
 | --- | --- |
-| 测什么、测多深、使用什么判据和用例 | `$test-scope-case-designer` |
-| 使用什么工具、环境、权限和资产治理方式 | `$test-tool-governor` |
-| build 能否进入、暂停、准出测试或关闭生命周期 | `$test-process-governor` |
-| Agent 的重复采样、基线、语义质量和漂移信号 | `$agent-nondeterministic-evaluator` |
-| 是否发布、继续灰度、停止、回滚或关闭发布 | `$release-regression-gatekeeper` |
+| 测什么、测多深、回归层级、判据和用例 | `$test-scope-case-designer` |
+| 工具/环境/权限选择，以及确定性测试准入、暂停、准出和关闭 | `$test-execution-governor` |
+| Agent 评测集、重复采样、语义质量和漂移信号 | `$agent-nondeterministic-evaluator` |
+| 发布、灰度、停止、回滚和生产采样门禁 | `$release-gatekeeper` |
 
 ```text
-范围与用例 → 工具与环境 → 测试流程 → Agent 专项评测（按需）→ 发布门禁
+范围、用例与回归层级 → 执行能力与测试准出 → Agent 专项评测（按需）→ 生产发布门禁
 ```
 
-只有发布门禁技能拥有生产放量、停止和回滚决策；上游技能提供范围、工具、测试准出和质量证据。
+测试执行 skill 内部仍把工具选择、执行授权、测试门禁、执行进度和生命周期状态分开；测试准出不能推导生产发布。
 
 ## 场景目录
 
 | 顺序 | 目录 | 数量 | 关注点 |
 | ---: | --- | ---: | --- |
-| 01 | `onboarding-routing` | 2 | 仓库配置与工作路由 |
-| 02 | `research-modeling` | 2 | 一手调研、领域语言与 ADR |
-| 03 | `clarification-planning` | 3 | 访谈、异步问卷与决策地图 |
-| 04 | `specs-work-management` | 3 | 规格、实现票与外部请求分流 |
-| 05 | `design-prototyping` | 3 | 架构发现、模块设计与原型 |
-| 06 | `implementation-debugging` | 4 | TDD、诊断、冲突与代码审查 |
-| 07 | `quality-evaluation-release` | 5 | 测试治理、Agent 评测与发布 |
-| 08 | `collaboration-enablement` | 3 | 学习工作区、人工向导与交接 |
-
-每个技能使用统一结构：
-
-```text
-<skill-name>/
-├── SKILL.md
-├── agents/openai.yaml
-├── references/   # 可选：按需读取的规则和方法
-├── assets/       # 可选：复制或改造成输出的模板
-└── scripts/      # 可选：确定性帮助程序
-```
+| 01 | `repository-setup` | 1 | 仓库级工作流配置 |
+| 02 | `domain-modeling` | 1 | 领域语言与 ADR |
+| 03 | `stakeholder-elicitation` | 1 | 人员输入与决策澄清 |
+| 04 | `tracker-work-management` | 2 | 持久化规划与外部请求分流 |
+| 05 | `codebase-design` | 1 | 架构发现与模块设计 |
+| 06 | `implementation-debugging` | 6 | TDD、重构、迁移、诊断、冲突和审查 |
+| 07 | `quality-evaluation-release` | 4 | 测试治理、Agent 评测和发布 |
 
 ## 本地校验
 
 ```powershell
-# Windows PowerShell
 powershell -ExecutionPolicy Bypass -File scripts/Test-Skills.ps1
-
-# PowerShell 7+
+# 或 PowerShell 7+
 pwsh -File scripts/Test-Skills.ps1
 ```
 
-相同检查会在 push 和 Pull Request 时由 GitHub Actions 执行。
-
-## 文档与维护
+## 文档
 
 - [技能分布与职责边界](docs/skills-distribution.md)
-- [针对性精简设计规范 v2](docs/targeted-skill-simplification-spec.md)
-- [第一轮精简与迁移记录](docs/skill-simplification-spec.md)
+- [开发场景编排提效规范](docs/development-orchestration-efficiency-spec.md)
 - [贡献指南](CONTRIBUTING.md)
-- [MIT License](LICENSE)
+- [历史精简记录 v2](docs/targeted-skill-simplification-spec.md)
+- [历史精简记录 v1](docs/skill-simplification-spec.md)
 
-新增或修改技能时，优先完善现有职责，不创建只转发到其他技能的 alias，也不要把 Codex 的默认能力包装成新技能。
+新增或修改 skill 时，优先扩展现有模式；不要创建只转发到其他入口的 alias，也不要把 Codex 默认能力包装成新 skill。

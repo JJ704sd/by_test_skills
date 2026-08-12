@@ -18,7 +18,20 @@ change_manifest:
 agent_manifest:
   agent_version: null
   prompt_model_rules_tools_knowledge_schema: []
+agent_case_baseline:
+  owner: test-scope-case-designer
+  version: null
+  approval_status: APPROVED | REVIEW_REQUIRED | BLOCKED
+  artifact_ref: null
+tool_bindings:
+  owner: test-execution-governor
+  mode: tool_selection
+  runner_product_version: null
+  judge_products_versions: []
+  authorization_ref: null
 dataset_manifest:
+  derived_by: agent-nondeterministic-evaluator
+  case_baseline_version: null
   version: null
   counts_by_set: {}
   sanitized: false
@@ -52,7 +65,7 @@ execution_plan:
   judge_cascade: [exact_schema, deterministic_rule, semantic_rubric, human_review]
 ```
 
-在线模式还需批准的 release、既有 `offline_gate=PASS`、当前阶段和采样授权。首版基线需说明原因和批准角色。
+在线模式还需批准的 release、既有 `offline_gate=PASS`、当前阶段和 `actor_authorization`。运维授权是操作者证据，不替代 `$release-gatekeeper` 的生产门禁。首版基线需说明原因和批准角色。
 
 ## 用例契约
 
@@ -101,7 +114,7 @@ handoff_packet:
   invalidation_triggers: []
 ```
 
-`snapshot_id` 绑定 Agent 清单、数据集、阈值、环境、runner、Judge、采样和重试。任何绑定项变化时只失效依赖它的缓存和结论。
+`snapshot_id` 绑定 Agent 清单、用例基线、派生数据集、阈值、环境、runner、Judge、采样和重试。任何绑定项变化时只失效依赖它的缓存和结论。数据集转换不得反向修改批准的场景意图、判据或采样要求；需要修改时返回范围所有者。
 
 深度约束：`preflight` 不产生离线门禁；`impacted` 成功不能 `PASS`，但批准计划中的硬失败可 `FAIL`；只有 `required_gate` 可 `PASS`。`online_monitor` 必须引用既有离线 `PASS`，且不生成新离线结论。
 

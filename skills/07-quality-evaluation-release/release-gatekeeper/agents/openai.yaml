@@ -1,0 +1,4 @@
+interface:
+  display_name: "生产发布门禁"
+  short_description: "基于证据决定生产发布、灰度、停止、回滚、恢复与关闭"
+  default_prompt: "使用 $release-gatekeeper 审核上游证据并给出当前生产发布或回滚决策。"
