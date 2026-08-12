@@ -186,3 +186,4 @@ if ($failures.Count -gt 0) {
 }
 
 Write-Host "Validator mutation tests passed ($($mutations.Count) cases)." -ForegroundColor Green
+exit 0
