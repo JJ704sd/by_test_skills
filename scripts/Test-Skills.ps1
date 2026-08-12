@@ -6,18 +6,18 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $skillsRoot = Join-Path $repoRoot 'skills'
 $errors = [System.Collections.Generic.List[string]]::new()
 
-$expectedScenarioCount = 7
-$expectedSkillCount = 16
 $maxSkillLines = 100
-$maxTotalSkillLines = 800
-$maxTotalSkillChars = 52000
+$maxTotalSkillLines = 500
+$maxTotalSkillChars = 40500
+$maxTotalResourceLines = 1900
+$maxTotalResourceChars = 76000
 $qualityGroupName = '07-quality-evaluation-release'
-$maxQualitySkillLines = 225
-$maxQualityResourceLines = 1800
+$maxQualitySkillLines = 135
+$maxQualityResourceLines = 950
 $maxSkillNameChars = 64
 $maxDescriptionChars = 300
 $allowedSkillDirectories = @('agents', 'assets', 'references', 'scripts')
-$textResourceExtensions = @('.md', '.yaml', '.yml', '.sh', '.ps1')
+$repositoryTextExtensions = @('.md', '.yaml', '.yml', '.sh', '.ps1', '.json', '.txt')
 $retiredSkillNames = @(
     'ask-matt',
     'setup-matt-pocock-skills',
@@ -45,74 +45,7 @@ $retiredSkillNames = @(
     'wizard',
     'writing-for-agents'
 )
-$efficiencyContracts = @{
-    'elicit-stakeholder-input' = @(
-        @{ Label = 'exclusive live/async modes'; Patterns = @('(?i)choose exactly one mode', '(?i)live', '(?i)async') },
-        @{ Label = 'evidence-first boundary'; Patterns = @('(?i)discoverable facts', '(?i)available evidence') },
-        @{ Label = 'mode transition stop'; Patterns = @('(?i)do not silently switch modes', '(?i)stop and propose an async questionnaire') },
-        @{ Label = 'no implicit implementation'; Patterns = @('(?i)do not begin implementation') }
-    )
-    'plan-engineering-work' = @(
-        @{ Label = 'exclusive map/spec/slice modes'; Patterns = @('(?i)select one mode', '(?i)map', '(?i)spec', '(?i)slice') },
-        @{ Label = 'configured tracker gate'; Patterns = @('(?i)tracker conventions are missing', '(?i)configure-engineering-skills') },
-        @{ Label = 'no automatic lifecycle advance'; Patterns = @('(?i)exactly one mode per invocation', '(?i)never advance automatically') }
-    )
-    'codebase-design' = @(
-        @{ Label = 'dependency and trust-boundary graph'; Patterns = @('(?i)dependency and trust-boundary graph') },
-        @{ Label = 'independent alternatives and one integrator'; Patterns = @('(?i)independent subagents', '(?i)one integrator', '(?i)do not use majority vote') },
-        @{ Label = 'constraint checkpoint'; Patterns = @('(?i)constraint checkpoint', '(?i)pinned repository input') }
-    )
-    'tdd' = @(
-        @{ Label = 'behavior-slice graph'; Patterns = @('(?i)behavior-slice graph') },
-        @{ Label = 'safe independent red fan-out'; Patterns = @('(?i)independent red', '(?i)disjoint write sets') },
-        @{ Label = 'single seam owner and fan-in gate'; Patterns = @('(?i)one writer for the same public seam', '(?i)at fan-in', '(?i)green checkpoint') },
-        @{ Label = 'red-state integrity'; Patterns = @('(?i)do not enter green without the intended red') }
-    )
-    'refactoring-safely' = @(
-        @{ Label = 'impact graph and migration waves'; Patterns = @('(?i)impact graph', '(?i)migration wave') },
-        @{ Label = 'single writer and serial global proof'; Patterns = @('(?i)a single writer', '(?i)global preservation proof.{0,80}remain serial') },
-        @{ Label = 'preservation checkpoint invalidation'; Patterns = @('(?i)preservation checkpoint', '(?i)stop the current wave immediately', '(?i)revalidate affected work') }
-    )
-    'evolving-contracts' = @(
-        @{ Label = 'dependency graph and compatibility matrix'; Patterns = @('(?i)producer-reader-storage-deployment dependency graph', '(?i)pinned compatibility matrix') },
-        @{ Label = 'phase gates and serial authority'; Patterns = @('(?i)explicit phase gates', '(?i)authoritative writes.{0,120}remain serial') },
-        @{ Label = 'checkpoint resume safety'; Patterns = @('(?i)durable batch cursor', '(?i)before resume, revalidate every field', '(?i)do not replay writes') }
-    )
-    'diagnosing-bugs' = @(
-        @{ Label = 'evidence graph and context capsule'; Patterns = @('(?i)observation-hypothesis-experiment evidence graph', '(?i)context capsule') },
-        @{ Label = 'parallel reads and serial experiments'; Patterns = @('(?i)independent read-only evidence.{0,80}parallel', '(?i)causal experiments remain serial') },
-        @{ Label = 'bounded no-progress stop'; Patterns = @('(?i)two consecutive rounds add no new evidence', '(?i)budget stop is not a diagnosis') }
-    )
-    'review-code-against-spec' = @(
-        @{ Label = 'coverage map'; Patterns = @('(?i)requirements-files-checks coverage map') },
-        @{ Label = 'pinned dual-axis workers'; Patterns = @('(?i)Standards and Spec as independent read-only workers', '(?i)pinned change set') },
-        @{ Label = 'single report fan-in'; Patterns = @('(?i)at fan-in', '(?i)single report writer') },
-        @{ Label = 'risk-first bounded review'; Patterns = @('(?i)risk-first review pass', '(?i)residual verification gap') }
-    )
-    'resolving-merge-conflicts' = @(
-        @{ Label = 'conflict dependency graph'; Patterns = @('(?i)conflict dependency graph') },
-        @{ Label = 'read-only pinned analysis'; Patterns = @('(?i)analyze independent conflicts read-only', '(?i)pinned Git state') },
-        @{ Label = 'single resolver and invalidation'; Patterns = @('(?i)a single resolver', '(?i)Git-state change invalidates') },
-        @{ Label = 'ambiguous semantics stop'; Patterns = @('(?i)cannot uniquely determine the semantics', '(?i)request the minimum user decision') }
-    )
-}
-
-function Test-RequiredPatterns {
-    param(
-        [Parameter(Mandatory)]
-        [string]$Text,
-
-        [Parameter(Mandatory)]
-        [string[]]$Patterns
-    )
-
-    foreach ($pattern in $Patterns) {
-        if ($Text -notmatch $pattern) {
-            return $false
-        }
-    }
-    return $true
-}
+$retiredSchemaPatterns = @('(?i)wayfinder:')
 
 function Test-MarkdownLinks {
     param(
@@ -157,9 +90,6 @@ $seenSkillNames = [System.Collections.Generic.HashSet[string]]::new([System.Stri
 if ($groupDirectories.Count -eq 0) {
     $errors.Add('skills/: no scenario groups found')
 }
-elseif ($groupDirectories.Count -ne $expectedScenarioCount) {
-    $errors.Add("skills/: expected $expectedScenarioCount scenario groups, found $($groupDirectories.Count)")
-}
 
 for ($index = 0; $index -lt $groupDirectories.Count; $index++) {
     $group = $groupDirectories[$index]
@@ -186,12 +116,10 @@ for ($index = 0; $index -lt $groupDirectories.Count; $index++) {
     }
 }
 
-if ($skillDirectories.Count -ne $expectedSkillCount) {
-    $errors.Add("skills/: expected $expectedSkillCount skills, found $($skillDirectories.Count)")
-}
-
 $totalSkillLines = 0
 $totalSkillChars = 0
+$totalResourceLines = 0
+$totalResourceChars = 0
 $referenceCount = 0
 $assetCount = 0
 $scriptCount = 0
@@ -236,14 +164,6 @@ foreach ($directory in $skillDirectories) {
         $errors.Add("${relativeSkill}: SKILL.md has $($skillLines.Count) lines; maximum is $maxSkillLines")
     }
 
-    if ($efficiencyContracts.ContainsKey($directory.Name)) {
-        foreach ($rule in $efficiencyContracts[$directory.Name]) {
-            if (-not (Test-RequiredPatterns -Text $content -Patterns $rule.Patterns)) {
-                $errors.Add("${relativeSkill}: efficiency contract missing: $($rule.Label)")
-            }
-        }
-    }
-
     foreach ($resourceDirectoryName in @('references', 'assets', 'scripts')) {
         $resourceDirectory = Join-Path $directory.FullName $resourceDirectoryName
         if (-not (Test-Path -LiteralPath $resourceDirectory -PathType Container)) {
@@ -254,6 +174,12 @@ foreach ($directory in $skillDirectories) {
             $relativeResource = $resourceFile.FullName.Substring($directory.FullName.Length + 1).Replace('\', '/')
             if (-not $content.Contains($relativeResource)) {
                 $errors.Add("${relativeSkill}: resource is not directly routed from SKILL.md: $relativeResource")
+            }
+
+            if ($resourceFile.Extension -in $repositoryTextExtensions) {
+                $resourceContent = Get-Content -LiteralPath $resourceFile.FullName -Raw -Encoding UTF8
+                $totalResourceLines += @(Get-Content -LiteralPath $resourceFile.FullName -Encoding UTF8).Count
+                $totalResourceChars += $resourceContent.Length
             }
         }
     }
@@ -360,6 +286,9 @@ foreach ($directory in $skillDirectories) {
         $referenceFiles = @(Get-ChildItem -LiteralPath $referencesDirectory -File)
         $referenceCount += $referenceFiles.Count
         foreach ($referenceFile in $referenceFiles) {
+            if ($referenceFile.BaseName -match '(?i)(?:^|-)templates?$') {
+                $errors.Add("${relativeSkill}: pure output templates belong in assets/: references/$($referenceFile.Name)")
+            }
             if ($referenceFile.Extension -ieq '.md') {
                 $referenceLines = @(Get-Content -LiteralPath $referenceFile.FullName -Encoding UTF8)
                 if ($referenceLines.Count -gt 100) {
@@ -379,7 +308,17 @@ foreach ($directory in $skillDirectories) {
 
     $scriptsDirectory = Join-Path $directory.FullName 'scripts'
     if (Test-Path -LiteralPath $scriptsDirectory -PathType Container) {
-        $scriptCount += @(Get-ChildItem -LiteralPath $scriptsDirectory -Recurse -File).Count
+        $scriptFiles = @(Get-ChildItem -LiteralPath $scriptsDirectory -Recurse -File)
+        $scriptCount += $scriptFiles.Count
+        foreach ($scriptFile in $scriptFiles) {
+            if ($scriptFile.Extension -in @('.sh', '.ps1')) {
+                $scriptContent = Get-Content -LiteralPath $scriptFile.FullName -Raw -Encoding UTF8
+                if ($scriptContent -match '(?im)^\s*Read-Host\b' -or
+                    $scriptContent -match '(?im)^\s*read\b[^\r\n]*\s-p(?:\s|$)') {
+                    $errors.Add("${relativeSkill}: interactive scripts must be user-run artifacts, not skill scripts: scripts/$($scriptFile.Name)")
+                }
+            }
+        }
     }
 
     foreach ($markdownFile in @(Get-ChildItem -LiteralPath $directory.FullName -Recurse -File -Filter '*.md')) {
@@ -409,6 +348,12 @@ foreach ($instructionFile in @(
         $pattern = '(?<![a-z0-9-])(?:\$|/)' + [regex]::Escape($retiredName) + '(?![a-z0-9-])'
         if ($instructionContent -match $pattern) {
             $errors.Add("${relativeFile}: references retired skill '$retiredName'")
+        }
+    }
+
+    foreach ($retiredSchemaPattern in $retiredSchemaPatterns) {
+        if ($instructionContent -match $retiredSchemaPattern) {
+            $errors.Add("${relativeFile}: references retired tracker schema '$($Matches[0])'")
         }
     }
 
@@ -442,6 +387,55 @@ foreach ($guidancePath in $activeGuidanceFiles) {
             $errors.Add("${relativeGuidance}: references retired skill '$retiredName'")
         }
     }
+
+    foreach ($retiredSchemaPattern in $retiredSchemaPatterns) {
+        if ($guidanceContent -match $retiredSchemaPattern) {
+            $errors.Add("${relativeGuidance}: references retired tracker schema '$($Matches[0])'")
+        }
+    }
+
+    foreach ($activeName in $seenSkillNames) {
+        $dollarCall = '$' + $activeName
+        $slashPattern = '(?<![A-Za-z0-9._-])/' + [regex]::Escape($activeName) + '(?![a-z0-9-])'
+        if ($guidanceContent -match $slashPattern) {
+            $errors.Add("${relativeGuidance}: uses slash-style invocation '/$activeName'; use '$dollarCall'")
+        }
+    }
+}
+
+# Validate every repository Markdown link, not only links bundled inside skills.
+$repositoryMarkdownFiles = @(
+    Get-ChildItem -LiteralPath $repoRoot -File -Filter '*.md'
+    Get-ChildItem -LiteralPath (Join-Path $repoRoot 'docs') -Recurse -File -Filter '*.md'
+) | Sort-Object FullName -Unique
+foreach ($markdownFile in $repositoryMarkdownFiles) {
+    Test-MarkdownLinks -File $markdownFile
+}
+
+# Reject undecodable text and final-tree whitespace even when the current Git diff
+# does not expose the file (for example, on a shallow CI checkout).
+$strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
+$repositoryTextFiles = @(
+    Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
+        Where-Object {
+            $_.FullName -notmatch '[\\/]\.git[\\/]' -and
+            $_.FullName -notmatch '[\\/]tmp[\\/]' -and
+            $_.Extension -in $repositoryTextExtensions
+        }
+)
+foreach ($textFile in $repositoryTextFiles) {
+    $relativeTextFile = $textFile.FullName.Substring($repoRoot.Length + 1)
+    try {
+        $decodedText = $strictUtf8.GetString([System.IO.File]::ReadAllBytes($textFile.FullName))
+    }
+    catch {
+        $errors.Add("${relativeTextFile}: file is not strict UTF-8")
+        continue
+    }
+
+    if ($decodedText -match '(?m)[\t ]+$') {
+        $errors.Add("${relativeTextFile}: contains trailing whitespace")
+    }
 }
 
 if ($totalSkillLines -gt $maxTotalSkillLines) {
@@ -452,14 +446,19 @@ if ($totalSkillChars -gt $maxTotalSkillChars) {
     $errors.Add("skills/: SKILL.md total is $totalSkillChars characters; maximum is $maxTotalSkillChars")
 }
 
+if ($totalResourceLines -gt $maxTotalResourceLines) {
+    $errors.Add("skills/: text resources total $totalResourceLines lines; maximum is $maxTotalResourceLines")
+}
+
+if ($totalResourceChars -gt $maxTotalResourceChars) {
+    $errors.Add("skills/: text resources total $totalResourceChars characters; maximum is $maxTotalResourceChars")
+}
+
 $qualityGroup = Join-Path $skillsRoot $qualityGroupName
 $qualitySkillLines = 0
 $qualityResourceLines = 0
 
-if (-not (Test-Path -LiteralPath $qualityGroup -PathType Container)) {
-    $errors.Add("skills/: missing required quality group '$qualityGroupName'")
-}
-else {
+if (Test-Path -LiteralPath $qualityGroup -PathType Container) {
     $qualitySkillFiles = @(Get-ChildItem -LiteralPath $qualityGroup -Recurse -File -Filter 'SKILL.md')
     $qualitySkillLines = (
         $qualitySkillFiles |
@@ -470,8 +469,8 @@ else {
         Get-ChildItem -LiteralPath $qualityGroup -Recurse -File |
             Where-Object {
                 $_.Name -cne 'SKILL.md' -and
-                $_.FullName -notmatch '\\agents\\' -and
-                $_.Extension -in $textResourceExtensions
+        $_.FullName -notmatch '[\\/]agents[\\/]' -and
+                $_.Extension -in $repositoryTextExtensions
             }
     )
     $qualityResourceLines = (
@@ -489,10 +488,15 @@ if ($qualityResourceLines -gt $maxQualityResourceLines) {
     $errors.Add("${qualityGroupName}: text resources total $qualityResourceLines lines; maximum is $maxQualityResourceLines")
 }
 
-$efficiencySpecPath = Join-Path $repoRoot 'docs\development-orchestration-efficiency-spec.md'
+$efficiencySpecPath = Join-Path $repoRoot 'docs/development-orchestration-efficiency-spec.md'
+$simplificationSpecPath = Join-Path $repoRoot 'docs/skill-simplification-v3-spec.md'
+$distributionPath = Join-Path $repoRoot 'docs/skills-distribution.md'
 $readmePath = Join-Path $repoRoot 'README.md'
 if (-not (Test-Path -LiteralPath $efficiencySpecPath -PathType Leaf)) {
     $errors.Add('docs/: missing development-orchestration-efficiency-spec.md')
+}
+if (-not (Test-Path -LiteralPath $simplificationSpecPath -PathType Leaf)) {
+    $errors.Add('docs/: missing skill-simplification-v3-spec.md')
 }
 if (-not (Test-Path -LiteralPath $readmePath -PathType Leaf)) {
     $errors.Add('repository: missing README.md')
@@ -502,9 +506,64 @@ else {
     if ($readmeContent -notmatch '\(docs/development-orchestration-efficiency-spec\.md\)') {
         $errors.Add('README.md: missing development orchestration efficiency spec link')
     }
-    foreach ($term in @('graph', 'evidence loop', 'subagent', 'single-writer')) {
-        if ($readmeContent -notmatch [regex]::Escape($term)) {
-            $errors.Add("README.md: missing orchestration guidance '$term'")
+    if ($readmeContent -notmatch '\(docs/skill-simplification-v3-spec\.md\)') {
+        $errors.Add('README.md: missing current skill simplification spec link')
+    }
+
+    $skillBadge = [regex]::Match($readmeContent, 'skills-(\d+)-')
+    $scenarioBadge = [regex]::Match($readmeContent, 'scenarios-(\d+)-')
+    $projectedSkillBadge = if ($skillBadge.Success) { [int]$skillBadge.Groups[1].Value } else { -1 }
+    $projectedScenarioBadge = if ($scenarioBadge.Success) { [int]$scenarioBadge.Groups[1].Value } else { -1 }
+    if ($projectedSkillBadge -ne $skillDirectories.Count) {
+        $errors.Add("README.md: skills badge must match discovered count $($skillDirectories.Count)")
+    }
+    if ($projectedScenarioBadge -ne $groupDirectories.Count) {
+        $errors.Add("README.md: scenarios badge must match discovered count $($groupDirectories.Count)")
+    }
+
+    foreach ($directory in $skillDirectories) {
+        if (-not $readmeContent.Contains($directory.Name)) {
+            $errors.Add("README.md: missing active skill '$($directory.Name)'")
+        }
+    }
+}
+
+if (-not (Test-Path -LiteralPath $distributionPath -PathType Leaf)) {
+    $errors.Add('docs/: missing skills-distribution.md')
+}
+else {
+    $distributionContent = Get-Content -LiteralPath $distributionPath -Raw -Encoding UTF8
+    $distributionScenarioCount = [regex]::Match($distributionContent, '(?m)^\|\s*\u573A\u666F\u7EC4\s*\|\s*(\d+)\s*\|\s*$')
+    $distributionSkillCount = [regex]::Match($distributionContent, '(?m)^\|\s*Skill \u76EE\u5F55 / `SKILL\.md`\s*\|\s*(\d+)\s*\|\s*$')
+    $distributionAgentCount = [regex]::Match($distributionContent, '(?m)^\|\s*`agents/openai\.yaml`\s*\|\s*(\d+)\s*\|\s*$')
+
+    $projectedScenarioCount = if ($distributionScenarioCount.Success) { [int]$distributionScenarioCount.Groups[1].Value } else { -1 }
+    $projectedSkillCount = if ($distributionSkillCount.Success) { [int]$distributionSkillCount.Groups[1].Value } else { -1 }
+    $projectedAgentCount = if ($distributionAgentCount.Success) { [int]$distributionAgentCount.Groups[1].Value } else { -1 }
+
+    if ($projectedScenarioCount -ne $groupDirectories.Count) {
+        $errors.Add("docs/skills-distribution.md: scenario count must match discovered count $($groupDirectories.Count)")
+    }
+    if ($projectedSkillCount -ne $skillDirectories.Count) {
+        $errors.Add("docs/skills-distribution.md: skill count must match discovered count $($skillDirectories.Count)")
+    }
+    if ($projectedAgentCount -ne $skillDirectories.Count) {
+        $errors.Add("docs/skills-distribution.md: agent metadata count must match discovered count $($skillDirectories.Count)")
+    }
+
+    $projectedSkillLinks = @(
+        [regex]::Matches($distributionContent, '\.\./skills/[^/\s)]+/[^/\s)]+/SKILL\.md') |
+            ForEach-Object { $_.Value }
+    )
+    if ($projectedSkillLinks.Count -ne $skillDirectories.Count) {
+        $errors.Add("docs/skills-distribution.md: active skill link count must match discovered count $($skillDirectories.Count)")
+    }
+
+    foreach ($directory in $skillDirectories) {
+        $expectedLink = "../skills/$($directory.Parent.Name)/$($directory.Name)/SKILL.md"
+        $matchingLinks = @($projectedSkillLinks | Where-Object { $_ -ceq $expectedLink })
+        if ($matchingLinks.Count -ne 1) {
+            $errors.Add("docs/skills-distribution.md: expected exactly one active skill link '$expectedLink'")
         }
     }
 }
@@ -520,6 +579,7 @@ Write-Host "  Scenario groups:  $($groupDirectories.Count)"
 Write-Host "  Skills:           $($skillDirectories.Count)"
 Write-Host "  SKILL.md lines:   $totalSkillLines"
 Write-Host "  SKILL.md chars:   $totalSkillChars"
+Write-Host "  Text resources:   $totalResourceLines lines / $totalResourceChars chars"
 Write-Host "  Quality SKILLs:   $qualitySkillLines lines"
 Write-Host "  Quality resources: $qualityResourceLines lines"
 Write-Host "  References:       $referenceCount"

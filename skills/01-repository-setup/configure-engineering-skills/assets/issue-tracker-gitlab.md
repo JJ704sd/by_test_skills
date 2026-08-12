@@ -1,46 +1,33 @@
 # Issue tracker: GitLab
 
-Issues and specs for this repo live as GitLab issues. Use the [`glab`](https://gitlab.com/gitlab-org/cli) CLI for all operations.
+Issues and specifications for this repository live as GitLab issues.
 
-## Conventions
+## Access
 
-- **Create an issue**: `glab issue create --title "..." --description "..."`. Use a heredoc for multi-line descriptions. Pass `--description -` to open an editor.
-- **Read an issue**: `glab issue view <number> --comments`. Use `-F json` for machine-readable output.
-- **List issues**: `glab issue list -F json` with appropriate `--label` filters.
-- **Comment on an issue**: `glab issue note <number> --message "..."`. GitLab calls comments "notes".
-- **Apply / remove labels**: `glab issue update <number> --label "..."` / `--unlabel "..."`. Multiple labels can be comma-separated or by repeating the flag.
-- **Close**: `glab issue close <number>`. `glab issue close` does not accept a closing comment, so post the explanation first with `glab issue note <number> --message "..."`, then close.
-- **Merge requests**: GitLab calls PRs "merge requests". Use `glab mr create`, `glab mr view`, `glab mr note`, etc. — the same shape as `gh pr ...` with `mr` in place of `pr` and `note`/`--message` in place of `comment`/`--body`.
+Prefer an available authenticated GitLab connector or API that covers the operation. Fall back to the authenticated `glab` CLI when the connector is unavailable or lacks a required command. Before every write, verify the project, issue or merge request, intended mutation, and current authorization; never move credentials into commands or files.
 
-Infer the repo from `git remote -v` — `glab` does this automatically when run inside a clone.
+## Request surfaces
 
-## Merge requests as a triage surface
+- Issues are the default inbound and publishing surface.
+- **MRs as a request surface: no.** Set this to `yes` only when external merge requests should enter triage.
+- When enabled, triage non-maintainer MRs; an explicitly named MR remains eligible.
 
-**MRs as a request surface: no.** _(Set to `yes` if this repo treats external merge requests as feature requests; `$triage` reads this flag.)_
+Read full descriptions, notes, labels, authors, dates, and diffs when relevant. Use connector/API operations first; CLI fallbacks include `glab issue view/list/create/note/update/close` and the corresponding `glab mr` commands.
 
-When set to `yes`, MRs run through the same labels and states as issues, using the `glab mr` equivalents:
+## Planning representation
 
-- **Read an MR**: `glab mr view <number> --comments` and `glab mr diff <number>` for the diff.
-- **List external MRs for triage**: `glab mr list -F json`, then keep only MRs whose author is not a project member/owner (a contributor's MR, not a maintainer's in-flight work).
-- **Comment / label / close**: `glab mr note`, `glab mr update --label`/`--unlabel`, `glab mr close`.
+```yaml
+planning:
+  map_label: planning:map
+  type_labels:
+    research: planning:research
+    prototype: planning:prototype
+    stakeholder: planning:stakeholder
+    task: planning:task
+```
 
-Unlike GitHub, GitLab numbers issues and MRs separately, so `#42` is unambiguous once you know which surface the maintainer means.
+- Represent a map as one labelled issue and each ticket as a child relationship when available; otherwise put `Part of #<map>` in each child.
+- Prefer native blocking links; otherwise use a `Blocked by: #<n>` line. A ticket is ready only when every blocker is closed and it is unclaimed.
+- Claim with the configured assignee mechanism before work. Resolve by recording the answer, closing the child, and appending a linked one-line gist to the map.
 
-## When a skill says "publish to the issue tracker"
-
-Create a GitLab issue.
-
-## When a skill says "fetch the relevant ticket"
-
-Run `glab issue view <number> --comments`.
-
-## Wayfinding operations
-
-Used by `$plan-engineering-work` in `map` mode. The **map** is a single issue with **child** issues as tickets.
-
-- **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body. `glab issue create --label wayfinder:map`. (On GitLab tiers with native epics, an epic may hold the map instead; a labelled issue works everywhere.)
-- **Child ticket**: an issue carrying `Part of #<map>` at the top of its description and labels `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
-- **Blocking**: GitLab's **native blocking link** — the canonical, UI-visible representation. Add it with the `/blocked_by #<n>` quick action, posted as a note (`glab issue note <child> --message "/blocked_by #<blocker>"`). Native blocking links are a Premium/Ultimate feature; on the free tier (or where unavailable) fall back to a `Blocked by: #<n>, #<n>` line at the top of the description. A ticket is unblocked when every blocker is closed.
-- **Frontier query**: `glab issue list -F json` scoped to the map's children, drop any with an open blocker — a native `blocked_by` link to an open issue (`glab api projects/:id/issues/:iid/links`), or an open issue in the `Blocked by` line — or an assignee; first in map order wins.
-- **Claim**: `glab issue update <n> --assignee @me` — the session's first write.
-- **Resolve**: `glab issue note <n> --message "<answer>"`, then `glab issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.
+When a skill says “publish to the tracker,” create an issue. When it says “fetch a ticket,” read the full issue and notes. Use the configured labels rather than assuming these defaults after a repository customizes them.

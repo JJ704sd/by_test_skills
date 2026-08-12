@@ -133,11 +133,12 @@
 - `test-tool-governor` + `test-process-governor` → `test-execution-governor`。
 - `release-regression-gatekeeper` 收窄并更名为 `release-gatekeeper`；回归层级归测试范围。
 
-历史理由见 [第一轮精简记录](skill-simplification-spec.md) 与 [第二轮针对性精简记录](targeted-skill-simplification-spec.md)。开发 skill 的 graph、evidence loop、checkpoint 与安全并行约束见 [开发场景编排提效规范](development-orchestration-efficiency-spec.md)。
+历史理由见 [第一轮精简记录](skill-simplification-spec.md) 与 [第二轮针对性精简记录](targeted-skill-simplification-spec.md)；当前入口与资源收敛以 [持续精简规范 v3](skill-simplification-v3-spec.md) 为准。开发 skill 的 graph、evidence loop、checkpoint 与安全并行约束见 [开发场景编排提效规范](development-orchestration-efficiency-spec.md)。
 
 ## 维护边界
 
 1. `SKILL.md` 只保留模式选择、共同流程和硬约束；分支细节一层直达。
 2. 新模式必须复用现有意图和授权面；否则创建独立 skill。
-3. 新增、删除、移动或改名时同步更新本页、README、校验数量、退休调用和预算。
-4. 提交前运行 `pwsh -File scripts/Test-Skills.ps1` 与 `git diff --check`。
+3. 项目阈值必须有来源、口径、范围和批准状态；skill 不提供可直接判门禁的通用默认数字。
+4. 新增、删除、移动或改名时同步更新本页、README、动态 inventory 投影、退休调用和预算。
+5. 提交前运行 Windows PowerShell 的 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Skills.ps1` 和 `scripts/Test-ValidatorMutations.ps1`（PowerShell 7+ 使用 `pwsh -File ...`），再运行 `git diff --check`。

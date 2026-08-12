@@ -34,7 +34,7 @@
 9. 仅显式调用的技能在 `agents/openai.yaml` 使用 `policy.allow_implicit_invocation: false`；不要在 `SKILL.md` 使用 `disable-model-invocation` 或 `argument-hint`。
 10. 技能之间的调用统一写成 `$skill-name`。
 
-仓库预算由校验器执行：全部 `SKILL.md` 不超过 800 行 / 52,000 字符；07 质量组 `SKILL.md` 不超过 225 行，文本资源不超过 1,800 行。新增内容应先证明它属于每次必读正文还是按需资源；调整 skill 数量或职责时再以实测基线同步预算，不能用放宽预算掩盖冗余。校验器可以验证现有 skill 的契约，但不得把可选 skill 硬编码为不可删除的“核心”。
+仓库预算由校验器执行：全部 `SKILL.md` 不超过 500 行 / 40,500 字符；全部配套文本资源不超过 1,900 行 / 76,000 字符；07 质量组 `SKILL.md` 不超过 135 行，配套文本资源不超过 950 行。新增内容应先证明它属于每次必读正文还是按需资源；调整 skill 数量或职责时再以实测基线同步预算，不能用放宽预算掩盖冗余。校验器只证明结构、元数据、链接、资源、编码和预算等静态契约；触发、停止、owner 和授权边界必须用正负请求验证，不得用固定 prose 正则冻结可选 skill 或写法。
 
 ## 安全边界
 
@@ -42,7 +42,7 @@
 - 只修改任务授权范围内的文件；不要 stage unrelated changes。
 - 诊断技能默认止于原因和建议，除非用户同时授权修复。
 - 生产测试、放量、停止和回滚必须保留各自的授权与证据门禁。
-- 模板脚本必须静态检查；交互式或会写凭据的脚本由用户运行，不由技能自动执行。
+- Bundled `scripts/` 只放非交互、确定性且可安全自动执行的程序；需要人工操作时在会话中逐步请求，用户自行运行的辅助文件放在任务产物而不是 skill scripts。
 
 ## 调整场景或名称
 
@@ -55,6 +55,7 @@
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/Test-Skills.ps1
+powershell -ExecutionPolicy Bypass -File scripts/Test-ValidatorMutations.ps1
 git diff --check
 git status --short
 ```
