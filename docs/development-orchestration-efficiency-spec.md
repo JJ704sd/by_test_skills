@@ -81,5 +81,5 @@ advance | retry-with-new-evidence | serial-takeover | handoff-to-existing-skill 
 - 八个技能保持原触发和停止边界，并具备表中的最小 graph、loop、gate 和 single-writer 契约。
 - `SKILL.md` 只承载高频流程；安全、性能、测试、兼容和保全证据位于一层直达的 `references/`。
 - 新增、删除或移动技能后，README、分布文档、路由表、元数据和数量预算同步。
-- `scripts/Test-Skills.ps1` 校验结构、触发元数据、资源路由、链接、上下文预算及核心提效契约。
+- `scripts/Test-Skills.ps1` 校验结构、触发元数据、资源路由、活跃文档链接、编码和上下文预算；graph、gate、停止与授权语义按 [持续精简规范 v3](skill-simplification-v3-spec.md) 用独立 forward tests 验证，不由固定 prose 正则代替。
 - `git diff --check` 与仓库技能校验全部通过。

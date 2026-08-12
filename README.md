@@ -16,6 +16,7 @@
 - **授权隔离**：范围、执行、Agent 质量和生产流量分别由不同 owner 决策。
 - **资源自包含**：复制完整 skill 目录即可获得其资源；未安装的可选后继回退到 Codex 普通能力。
 - **受控编排**：适用技能使用 task-local graph、evidence loop、checkpoint、有限 subagent fan-out 和 single-writer fan-in。
+- **证据优先**：项目阈值必须带来源、口径、适用范围和批准状态；仓库不分发可直接判门禁的通用默认数字。
 
 ## 快速开始
 
@@ -83,14 +84,17 @@ git clone https://github.com/JJ704sd/by_test_skills.git
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/Test-Skills.ps1
+powershell -ExecutionPolicy Bypass -File scripts/Test-ValidatorMutations.ps1
 # 或 PowerShell 7+
 pwsh -File scripts/Test-Skills.ps1
+pwsh -File scripts/Test-ValidatorMutations.ps1
 ```
 
 ## 文档
 
 - [技能分布与职责边界](docs/skills-distribution.md)
 - [开发场景编排提效规范](docs/development-orchestration-efficiency-spec.md)
+- [当前持续精简规范 v3](docs/skill-simplification-v3-spec.md)
 - [贡献指南](CONTRIBUTING.md)
 - [历史精简记录 v2](docs/targeted-skill-simplification-spec.md)
 - [历史精简记录 v1](docs/skill-simplification-spec.md)

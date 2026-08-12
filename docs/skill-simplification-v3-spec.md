@@ -1,6 +1,6 @@
 # Skills 持续精简规范（v3）
 
-状态：Proposed
+状态：Implemented and validated
 
 日期：2026-08-12
 
@@ -273,4 +273,33 @@ Git 只有主 agent/integrator 可写。subagents 只做只读审计、互斥路
 
 ## 10. 实施结果
 
-实施后填写最终指标、文件范围、迁移结果、完整验证证据、subagent 独立审查结论、Git 分支/提交/PR 和残余风险；在此之前状态保持 `Proposed`。
+本轮按 spec-first 顺序完成 7 个场景、16 个 skill 的持续精简；skill 名称、目录、模式、显式调用策略、默认停止点和四类质量 owner 均未变化。
+
+| 指标 | 基线 | 最终 | 结果 |
+| --- | ---: | ---: | --- |
+| 场景 / skills | 7 / 16 | 7 / 16 | 精确集合不变 |
+| `SKILL.md` 行数 | 615 | 440 | -28.5% |
+| `SKILL.md` 字符数 | 45,903 | 33,738 | -26.5% |
+| 配套文本资源行数 | 2,396 | 1,557 | -35.0% |
+| 配套文本资源字符数 | 91,925 | 68,641 | -25.3% |
+| 07 组 `SKILL.md` 行数 | 138 | 103 | -25.4% |
+| 07 组配套资源行数 | 1,347 | 614 | -54.4% |
+| References / assets / skill scripts | 41 / 13 / 1 | 38 / 21 / 0 | 模板归位并删除交互脚本 |
+
+实现结果：
+
+- 01–06 组将重复 graph/checkpoint/single-writer 说明压成任务局部契约；07 组删除通用固定门禁数字与历史考据，并将纯输出骨架迁至 `assets/`。
+- GitHub/GitLab 新配置使用 `planning:*` 和 connector/API-first、认证 CLI fallback；`$plan-engineering-work` 消费仓库配置而不硬编码标签。既有旧配置仍可读取，重新配置时需预览确认，外部 label/issue 迁移另行授权。
+- async 问卷默认只在回复中返回；只有用户明确要求文件并确认路径时才写入。`hitl-loop.template.sh` 已删除，人工步骤改为当前会话中的逐步请求。
+- 静态 gate 动态推导 inventory，并覆盖预算、资源直达、活跃文档链接、严格 UTF-8、尾随空白、退休/slash/schema 调用、模板位置和交互脚本；12 个 mutation fixtures 均能触发非零退出。
+
+验证证据（2026-08-12）：
+
+- `scripts/Test-Skills.ps1`：PASS；最终指标如上，孤立资源、失效链接、退休/slash/schema 调用均为 0。
+- `scripts/Test-ValidatorMutations.ps1`：12/12 故意破坏样本被拒绝。
+- 官方 `quick_validate.py`（Python UTF-8 模式）：16/16 PASS；PyYAML：17 个 skill/CI YAML 文件解析通过。
+- PowerShell parser、严格 UTF-8、`git diff --check`：PASS；bundled shell scripts：0。
+- 两路盲测覆盖 26 条 01–06 请求和 14 条质量/授权请求：所有 skill/mode/停止/owner 路由符合第 7 节。独立复核发现工具选型模板缺少实施进度轴；补入 `implementation_progress` 并明确与 selection/authorization 互不推定后复核关闭。
+- 最终 Standards 复核无 P0/P1/P2；Spec 复核提出的唯一 P2（本节实施结果与状态缺失）已由当前更新关闭。
+
+残余风险：本机没有 `pwsh`，Windows PowerShell 5.1 路径已通过；Ubuntu `pwsh` 等价路径需由 draft PR 的 GitHub Actions 最终证明。当前本机 GitHub CLI 认证失效；Git 凭据恢复前不得把 token 写入仓库或绕过认证。实际 branch、commit 和 PR 信息只在操作成功后记录，不预填。
