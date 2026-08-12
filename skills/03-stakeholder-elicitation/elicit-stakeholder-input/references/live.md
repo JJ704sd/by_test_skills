@@ -26,9 +26,6 @@ After two consecutive rounds that neither close, narrow, nor reorder a frontier 
 
 ## Preserve ownership
 
-- Batch only mutually independent questions from the current frontier.
-- After each round, checkpoint pinned inputs, confirmed decisions, accepted assumptions, unresolved frontier, and the next question. Re-evaluate dependent decisions when a pinned input changes.
-- For independent, read-only, high-cost fact finding, pin the question, repository revision or paths, expected evidence, and stop condition before delegating. Validate returned evidence before updating the graph.
-- Do not delegate the user's judgment, interpretation of their answer, confirmation, or final shared understanding.
+Batch only independent frontier questions. After each round, checkpoint pinned inputs, confirmed decisions, assumptions, and the unresolved frontier; invalidate dependent conclusions when an input changes. Never delegate the user's judgment, interpretation, or confirmation.
 
 Stop when the frontier is empty or remaining uncertainty is explicitly accepted. Summarize confirmed decisions, accepted assumptions, unresolved risks, and the next recommended action, then ask the user to confirm the shared understanding.

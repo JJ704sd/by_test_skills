@@ -10,31 +10,6 @@ An agent brief is the durable contract posted to the configured tracker when an 
 - **Scoped:** name adjacent work that must not be included.
 - **Current:** for a PR, describe the existing diff and the gaps left to close rather than asking for a new implementation from scratch.
 
-## Template
-
-```markdown
-## Agent Brief
-
-**Category:** bug / enhancement
-**Summary:** <one-line result>
-
-**Current behavior:**
-<What happens now; for a PR, describe the current diff and remaining gaps.>
-
-**Desired behavior:**
-<Observable behavior after completion, including edge and error cases.>
-
-**Key interfaces:**
-- `<stable interface or type>` — <contract that must change>
-
-**Acceptance criteria:**
-- [ ] <Specific verifiable criterion>
-- [ ] <Boundary, error, or regression criterion>
-
-**Out of scope:**
-- <Adjacent work that must not be included>
-```
-
 ## Quality check
 
 Reject the draft if it merely says “fix the issue,” prescribes volatile files or line numbers, omits current-versus-desired behavior, lacks acceptance criteria, or leaves scope unbounded.

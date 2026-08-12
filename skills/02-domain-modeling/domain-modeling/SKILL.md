@@ -5,20 +5,11 @@ description: Build and sharpen a project's domain language and durable architect
 
 # Domain Modeling
 
-Read the relevant `CONTEXT.md`, `CONTEXT-MAP.md`, and ADRs before changing the model. Treat missing files as normal and create them only when there is resolved content to record.
+Read the relevant `CONTEXT.md`, `CONTEXT-MAP.md`, ADRs, and code before changing the model. Missing files are normal; create them only for resolved content.
 
-## During the discussion
+1. Surface conflicts between existing language, code, and claims. Replace vague or overloaded terms with one canonical term and test relationships against concrete boundaries.
+2. Keep implementation details and open questions out of the glossary.
+3. Persist a resolved term in its owning context using the [context rules](references/context-format.md) and [context template](assets/context-template.md). Use `CONTEXT-MAP.md` to infer ownership and ask only when it remains ambiguous.
+4. Offer an ADR only when the decision meets the [durability criteria](references/adr-format.md); then use the [ADR template](assets/adr-template.md), create the directory lazily, and allocate the next sequential number.
 
-- Call out conflicts with the existing glossary immediately.
-- Replace vague or overloaded language with one precise canonical term.
-- Stress-test relationships with concrete edge cases and boundary scenarios.
-- Compare factual claims with the code and surface contradictions for the user to resolve.
-- Keep implementation details out of `CONTEXT.md`; it is a domain glossary, not a specification or scratchpad.
-
-## Persist resolved knowledge
-
-When a term is resolved, update the appropriate `CONTEXT.md` immediately using [references/context-format.md](references/context-format.md). In multi-context repositories, use `CONTEXT-MAP.md` to select the owning context; ask only when ownership remains ambiguous.
-
-Offer an ADR only when the decision meets the durability criteria in [references/adr-format.md](references/adr-format.md). Create the ADR directory lazily, use the next sequential number, and record the trade-off without forcing optional sections that add no value.
-
-Do not write a glossary term or ADR while the underlying decision is still open.
+Do not write a term or ADR while the underlying decision remains open.

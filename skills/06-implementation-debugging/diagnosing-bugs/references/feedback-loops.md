@@ -13,7 +13,7 @@ Choose the earliest safe option that reproduces the exact symptom.
 7. Property or fuzz loop for input-dependent failures.
 8. Bisection harness between known versions or datasets.
 9. Differential loop comparing versions, environments, or configurations.
-10. Structured human loop using `../scripts/hitl-loop.template.sh` when automation is impossible.
+10. Structured conversation loop when automation is impossible: request one minimal human action, then capture only the redacted observation needed for the next hypothesis.
 
 Never capture credentials or personal data in fixtures or transcripts. Obtain approval before adding production instrumentation.
 

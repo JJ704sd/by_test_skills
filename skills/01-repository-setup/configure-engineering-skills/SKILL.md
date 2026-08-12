@@ -5,36 +5,16 @@ description: Configure a repository for the engineering skills by recording its 
 
 # Configure Engineering Skills
 
-Explore first, present the proposed configuration, obtain confirmation, then write. Update existing configuration in place and preserve unrelated user content.
+Inspect first, preview the exact result, obtain confirmation, then write. Preserve unrelated content and update existing configuration in place.
 
-## 1. Inspect the repository
+1. Inspect the remote, root `AGENTS.md`/`CLAUDE.md`, `docs/agents/`, `.scratch/`, domain documents, ADR layout, monorepo signals, and whether `$triage` is available.
+2. Resolve only unsettled choices. Prefer the detected remote's tracker; otherwise offer GitHub, GitLab, local Markdown, or a user-described tracker. Configure triage labels only when `$triage` is available. Default domain docs to root `CONTEXT.md` plus `docs/adr/`; use `CONTEXT-MAP.md` only for genuine context boundaries.
+3. Show the proposed `## Agent skills` block and every generated `docs/agents/*.md` file. Let the user revise them and do not write before confirmation.
+4. After confirmation, edit an existing `CLAUDE.md`; otherwise edit an existing `AGENTS.md`. If neither exists, ask which to create. Replace an existing skills block instead of appending a duplicate.
 
-Check:
+When an existing tracker document uses a legacy planning representation, keep consuming it unless the user requests migration. Preview the old-to-new mapping and affected external labels before changing repository configuration; tracker label or issue mutations require separate authorization.
 
-- `git remote -v` and `.git/config` for GitHub or GitLab
-- root `AGENTS.md` and `CLAUDE.md`, including any existing `## Agent skills` section
-- `CONTEXT.md`, `CONTEXT-MAP.md`, `docs/adr/`, and context-scoped ADR directories
-- `docs/agents/` and `.scratch/` for an existing configuration
-- monorepo signals such as `pnpm-workspace.yaml`, package workspaces, or multiple populated packages
-- whether `$triage` is available; label configuration is unnecessary otherwise
-
-## 2. Resolve only unsettled choices
-
-Recommend the detected remote's tracker. Otherwise offer GitHub, GitLab, local Markdown, or a user-described tracker. Record the result in `docs/agents/issue-tracker.md`.
-
-If `$triage` is available, recommend category roles `bug` and `enhancement` plus state roles `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. Ask for overrides only when the repository already uses different labels, then write every mapping to `docs/agents/triage-labels.md`.
-
-Default domain docs to a root `CONTEXT.md` plus `docs/adr/`. Offer `CONTEXT-MAP.md` with per-context files only when genuine monorepo boundaries exist. Record the choice in `docs/agents/domain.md`.
-
-## 3. Preview and confirm
-
-Show the exact `## Agent skills` block and generated `docs/agents/*.md` content before writing. Let the user edit the draft.
-
-## 4. Write
-
-Edit `CLAUDE.md` when it exists; otherwise edit `AGENTS.md`. If neither exists, ask which one to create. Never create the other file alongside an existing one, and replace an existing `## Agent skills` block instead of appending a duplicate.
-
-Load only the selected assets:
+Load only the assets selected by those choices:
 
 - [Agent skills block](assets/agent-skills-block.md)
 - [GitHub tracker](assets/issue-tracker-github.md)
@@ -43,4 +23,4 @@ Load only the selected assets:
 - [triage labels](assets/triage-labels.md), only when `$triage` is available
 - [domain-doc configuration](assets/domain.md)
 
-For another tracker, write the tracker document from the user's description. Finish by listing the files changed and noting that the configuration can be edited directly later.
+For another tracker, draft its document from the user's description. Stop after listing changed files and noting that the configuration can be edited directly later.

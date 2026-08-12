@@ -7,23 +7,17 @@ description: Implement known behavior or a verified bug fix through a stable pub
 
 Deliver one caller-observable behavior at a time through a stable public seam.
 
-Read applicable repository instructions, `CONTEXT.md`, the governing spec, relevant ADRs, and existing test conventions before editing.
+Pin the baseline, governing behavior, public seam, repository instructions, relevant ADRs, and test conventions before editing. If the behavior, seam, or baseline changes, invalidate the affected slice and re-establish its red state.
 
 ## Establish the seam
 
-Identify the interface through which a real caller observes the behavior. Derive it from the spec and codebase when clear; ask only when a different seam would materially change scope or architecture.
-
-Use `$codebase-design` first when the interface itself is unresolved. Do not test private methods or internal collaborators merely because they are convenient.
+Identify the interface through which a real caller observes the behavior. Use `$codebase-design` when the interface is unresolved; do not choose private internals for convenience.
 
 ## Plan behavior slices
 
-Build a small behavior-slice graph from acceptance criteria to public seams, focused red commands, affected paths, and cross-slice dependencies. Keep one writer for the same public seam. Fan out only current-frontier slices with no cross-slice dependency that can demonstrate an independent red and have disjoint write sets, test state, and side effects; otherwise keep them serial. Parallelize only when critical-path savings exceed coordination cost.
-
-Give each worker a context capsule with objective or slice, pinned baseline, dependencies and constraints, allowed reads, writes, and side effects, commands and evidence, budget or stop condition, and risks. Each worker completes one slice through red-green-refactor. At fan-in, one integrator inspects the combined diff and creates a green checkpoint with cross-slice checks before opening the next frontier.
+Map acceptance criteria to behavior slices, public seams, focused red commands, paths, and dependencies. One writer owns each shared seam; integrate a slice only after its intended red and focused green evidence are verified.
 
 ## Repeat red-green-refactor
-
-For one vertical behavior slice at a time:
 
 1. **Red**: write the smallest behavior test and run it. Confirm it fails because the requested behavior is absent or wrong—not because of syntax, configuration, environment, or an unrelated baseline failure.
 2. **Green**: implement only enough production code to pass the new test. Run the focused test again.
@@ -31,20 +25,10 @@ For one vertical behavior slice at a time:
 
 Do not write the entire test suite first or implement layer by layer. Do not enter green without the intended red. Stop or route to `$codebase-design` or `$diagnosing-bugs` when another attempt would repeat the same failure without new evidence.
 
-## Keep tests honest
-
-- Assert outcomes callers care about, not private state, call counts, or internal order.
-- Derive expected values from the spec, a worked example, or another independent source—not the implementation under test.
-- Prefer real in-process collaborators and realistic local stand-ins.
-- Replace only true external boundaries or nondeterministic sources such as time and randomness.
-- Avoid speculative cases and abstractions beyond the current behavior.
-
-Read [references/tests.md](references/tests.md) when evaluating a test seam, expectation, or boundary substitute.
+Assert caller-visible outcomes using expectations independent of the implementation. Prefer real in-process collaborators and substitute only true external or nondeterministic boundaries. Use [test guidance](references/tests.md) when choosing a seam, oracle, or substitute.
 
 For explicitly behavior-preserving restructuring, use `$refactoring-safely` for the preservation proof instead of inventing a red state.
 
 ## Verify and report
 
-Run the focused test on every cycle. Regularly run the smallest relevant test group plus applicable static checks. At completion, run broader safe project checks in proportion to the change.
-
-Report the seam, behaviors added, red evidence, checks run, and residual risk. Do not claim TDD if the test never demonstrated the intended red state. Use `$review-code-against-spec` only when the user requests a fixed-point review.
+Run the focused test every cycle and proportionate broader checks at completion. Report the seam, behavior, red evidence, checks, and residual risk. Do not claim TDD without the intended red; use `$review-code-against-spec` only when separately requested.
